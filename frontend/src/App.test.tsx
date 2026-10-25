@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import App from "./App";
@@ -94,21 +94,23 @@ describe("App routing and session", () => {
 });
 
 describe("App chat session", () => {
-  it("clears the conversation on logout", async () => {
+  it("clears the open chat on logout, while history stays available after logging in again", async () => {
     renderApp("/login");
     await loginHeading();
     await logInThroughForm();
     await chatHeading();
     await userEvent.type(screen.getByRole("textbox", { name: "Wiadomość" }), "Cześć{Enter}");
-    await screen.findByText("Cześć");
+    await within(await screen.findByRole("list", { name: "Wiadomości" })).findByText("Cześć");
 
     await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
     await loginHeading();
     await logInThroughForm();
     await chatHeading();
 
-    expect(screen.queryByText("Cześć")).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Wiadomości" })).not.toBeInTheDocument();
     expect(screen.getByText("W czym mogę pomóc?")).toBeInTheDocument();
+    const history = within(screen.getByRole("navigation", { name: "Rozmowy" }));
+    expect(await history.findByRole("button", { name: "Cześć" })).toBeInTheDocument();
   });
 });
 

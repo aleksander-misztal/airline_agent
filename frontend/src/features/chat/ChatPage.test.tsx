@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { MemoryRouter } from "react-router";
@@ -16,6 +16,8 @@ beforeEach(async () => {
 });
 
 const box = () => screen.getByRole("textbox", { name: "Wiadomość" });
+// Tytuł rozmowy w sidebarze to pierwsza wiadomość, więc treści szukamy tylko w wątku.
+const thread = async () => within(await screen.findByRole("list", { name: "Wiadomości" }));
 
 describe("ChatPage", () => {
   it("shows a welcome message and the quick suggestions", () => {
@@ -29,8 +31,8 @@ describe("ChatPage", () => {
   it("sends a message with Enter and shows the user message and the bot reply", async () => {
     await userEvent.type(box(), "Jak zrobić odprawę online?{Enter}");
 
-    expect(await screen.findByText("Jak zrobić odprawę online?")).toBeInTheDocument();
-    expect(await screen.findByText(/Odprawa online otwiera się 48 godzin/)).toBeInTheDocument();
+    expect(await (await thread()).findByText("Jak zrobić odprawę online?")).toBeInTheDocument();
+    expect(await (await thread()).findByText(/Odprawa online otwiera się 48 godzin/)).toBeInTheDocument();
     expect(box()).toHaveValue("");
   });
 
@@ -66,14 +68,14 @@ describe("ChatPage", () => {
   it("clicking a suggestion sends its prompt and the bot answers", async () => {
     await userEvent.click(screen.getByRole("button", { name: "Bagaż" }));
 
-    expect(await screen.findByText("Ile bagażu mogę zabrać?")).toBeInTheDocument();
-    expect(await screen.findByText(/Bagaż podręczny: do 7 kg/)).toBeInTheDocument();
+    expect(await (await thread()).findByText("Ile bagażu mogę zabrać?")).toBeInTheDocument();
+    expect(await (await thread()).findByText(/Bagaż podręczny: do 7 kg/)).toBeInTheDocument();
   });
 
   it("hides the welcome screen after the first message", async () => {
     await userEvent.type(box(), "Cześć{Enter}");
 
-    await screen.findByText("Cześć");
+    await (await thread()).findByText("Cześć");
     expect(screen.queryByText("W czym mogę pomóc?")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Status lotu" })).not.toBeInTheDocument();
   });

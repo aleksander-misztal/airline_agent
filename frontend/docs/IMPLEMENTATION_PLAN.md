@@ -124,7 +124,7 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 ### Etap 5 – Rozmowy
 - **Testy:** nowa rozmowa, lista rozmów, przełączanie między rozmowami, usuwanie.
 - **Funkcjonalność:** Sidebar z historią rozmów.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 6 – Dopracowanie
 - **Testy:** e2e Playwright – logowanie → rozmowa → wylogowanie.
