@@ -119,7 +119,7 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 ### Etap 4 – Czat
 - **Testy:** wysłanie wiadomości → pojawia się w liście → odpowiedź bota; wskaźnik „pisze…”; Enter wysyła, Shift+Enter nowa linia; klik w szybką podpowiedź wysyła ją; renderowanie wiadomości wg `type` (nieznany typ → fallback).
 - **Funkcjonalność:** ChatPage, MessageList (auto-scroll), MessageInput, szybkie podpowiedzi (Status lotu, Moja rezerwacja, Bagaż, Odprawa online), rejestr rendererów wiadomości.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 5 – Rozmowy
 - **Testy:** nowa rozmowa, lista rozmów, przełączanie między rozmowami, usuwanie.

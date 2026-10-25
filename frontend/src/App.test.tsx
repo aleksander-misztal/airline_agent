@@ -93,6 +93,25 @@ describe("App routing and session", () => {
   });
 });
 
+describe("App chat session", () => {
+  it("clears the conversation on logout", async () => {
+    renderApp("/login");
+    await loginHeading();
+    await logInThroughForm();
+    await chatHeading();
+    await userEvent.type(screen.getByRole("textbox", { name: "Wiadomość" }), "Cześć{Enter}");
+    await screen.findByText("Cześć");
+
+    await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
+    await loginHeading();
+    await logInThroughForm();
+    await chatHeading();
+
+    expect(screen.queryByText("Cześć")).not.toBeInTheDocument();
+    expect(screen.getByText("W czym mogę pomóc?")).toBeInTheDocument();
+  });
+});
+
 describe("brand config", () => {
   it("defines Qatar Airways identity", () => {
     expect(brand.name).toBe("Qatar Airways");

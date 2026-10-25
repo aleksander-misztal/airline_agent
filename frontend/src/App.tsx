@@ -5,18 +5,24 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { useAuthStore } from "./features/auth/authStore";
 import { ChatPage } from "./features/chat/ChatPage";
+import { useChatStore } from "./features/chat/chatStore";
 
 function RootLayout() {
   const user = useAuthStore((s) => s.user);
   const init = useAuthStore((s) => s.init);
   const logout = useAuthStore((s) => s.logout);
 
+  async function handleLogout() {
+    await logout();
+    useChatStore.getState().reset();
+  }
+
   useEffect(() => {
     void init();
   }, [init]);
 
   return (
-    <AppLayout user={user} onLogout={() => void logout()}>
+    <AppLayout user={user} onLogout={() => void handleLogout()}>
       <Outlet />
     </AppLayout>
   );
