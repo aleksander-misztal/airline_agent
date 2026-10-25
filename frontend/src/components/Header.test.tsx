@@ -1,15 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { Header } from "./Header";
 import { brand } from "../config/brand";
+import { plainNumber } from "../test/utils";
 import type { User } from "../api";
 
 const user: User = { id: "u-1", username: "admin", displayName: "Administrator" };
 
-const renderHeader = (props: Partial<React.ComponentProps<typeof Header>> = {}) =>
+const renderHeader = (props: Partial<React.ComponentProps<typeof Header>> = {}, path = "/") =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[path]}>
       <Header {...props} />
     </MemoryRouter>,
   );
@@ -50,5 +51,54 @@ describe("Header", () => {
     await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
 
     expect(onLogout).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Header navigation", () => {
+  it("shows the Dashboard and Asystent tabs when logged in", () => {
+    renderHeader({ user });
+
+    const nav = screen.getByRole("navigation", { name: "Główna nawigacja" });
+    expect(within(nav).getByRole("link", { name: "Dashboard" })).toHaveAttribute("href", "/dashboard");
+    expect(within(nav).getByRole("link", { name: "Asystent" })).toHaveAttribute("href", "/chat");
+  });
+
+  it("hides the tabs when nobody is logged in", () => {
+    renderHeader({ user: null });
+
+    expect(screen.queryByRole("navigation", { name: "Główna nawigacja" })).not.toBeInTheDocument();
+  });
+
+  it("marks the active tab", () => {
+    renderHeader({ user }, "/chat");
+
+    expect(screen.getByRole("link", { name: "Asystent" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Dashboard" })).not.toHaveAttribute("aria-current");
+  });
+});
+
+describe("Header Avios balance", () => {
+  it("shows the balance next to the user", () => {
+    renderHeader({ user, avios: 48250 });
+
+    expect(screen.getByText(`${plainNumber(48250)} Avios`)).toBeInTheDocument();
+  });
+
+  it("is hidden when nobody is logged in", () => {
+    renderHeader({ user: null, avios: 48250 });
+
+    expect(screen.queryByText(/Avios/)).not.toBeInTheDocument();
+  });
+
+  it("is hidden until the balance is loaded", () => {
+    renderHeader({ user, avios: null });
+
+    expect(screen.queryByText(/Avios/)).not.toBeInTheDocument();
+  });
+
+  it("shows a zero balance", () => {
+    renderHeader({ user, avios: 0 });
+
+    expect(screen.getByText("0 Avios")).toBeInTheDocument();
   });
 });

@@ -1,15 +1,12 @@
 import type { ComponentType } from "react";
 import type { FlightCardPayload, Message } from "../../api";
+import { dateOf, timeOf } from "../../lib/format";
 
 type RendererProps<T extends Message["type"]> = { message: Extract<Message, { type: T }> };
 
 function TextMessage({ message }: RendererProps<"text">) {
   return <p className="whitespace-pre-wrap">{message.payload.text}</p>;
 }
-
-// Godzina i data są wzięte wprost z ISO, czyli w czasie lokalnym lotniska (bez przeliczania stref).
-const timeOf = (iso: string) => iso.slice(11, 16);
-const dateOf = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.${iso.slice(0, 4)}`;
 
 function Endpoint({ place, iso }: { place: string; iso: FlightCardPayload["departure"] }) {
   return (

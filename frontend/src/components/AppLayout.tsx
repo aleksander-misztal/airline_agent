@@ -5,14 +5,15 @@ import type { User } from "../api";
 
 type AppLayoutProps = {
   user?: User | null;
+  avios?: number | null;
   onLogout?: () => void;
   children: ReactNode;
 };
 
-export function AppLayout({ user, onLogout, children }: AppLayoutProps) {
+export function AppLayout({ user, avios, onLogout, children }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={user} onLogout={onLogout} />
+      <Header user={user} avios={avios} onLogout={onLogout} />
       <main className="flex flex-1 flex-col">{children}</main>
       <Footer />
     </div>

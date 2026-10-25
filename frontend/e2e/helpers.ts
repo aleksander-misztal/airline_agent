@@ -5,7 +5,18 @@ export async function logIn(page: Page) {
   await page.getByLabel("Login").fill("admin");
   await page.getByLabel("Hasło").fill("admin");
   await page.getByRole("button", { name: "Zaloguj się" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+export async function openAssistant(page: Page) {
+  await page.getByRole("link", { name: "Asystent", exact: true }).click();
   await expect(page).toHaveURL(/\/chat$/);
+}
+
+/** Logowanie i przejście do zakładki Asystent. */
+export async function logInToAssistant(page: Page) {
+  await logIn(page);
+  await openAssistant(page);
 }
 
 export const sidebar = (page: Page) => page.getByRole("navigation", { name: "Rozmowy" });

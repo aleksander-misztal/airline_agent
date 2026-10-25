@@ -70,6 +70,12 @@ POST   /api/conversations                 → Conversation
 DELETE /api/conversations/:id
 GET    /api/conversations/:id/messages    → Message[]
 POST   /api/conversations/:id/messages    { content } → Message (odpowiedź agenta)
+
+GET    /api/dashboard                     → { avios, milesFlown, flightsTaken, upcomingBookings[] }
+
+GET    /api/airports?q=                   → Airport[]  (podpowiedzi lotnisk po mieście, kodzie lub nazwie)
+GET    /api/flights/search                → { outbound: FlightOffer[], inbound: FlightOffer[] | null }
+       ?from&to&departureDate&returnDate?&adults&children&infants&cabin
 ```
 
 Wiadomość ma typ, żeby łatwo dodawać nowe rodzaje treści:
@@ -137,16 +143,42 @@ Nowa strona **Dashboard** z zakładkami **Dashboard** i **Asystent** oraz popup 
 
 ### Założenia
 - Po zalogowaniu użytkownik trafia na **`/dashboard`** (wcześniej `/chat`). Zakładka „Asystent” prowadzi do istniejącego czatu pod `/chat` (adres się nie zmienia, żeby nie ruszać reszty).
-- Dashboard na start ma **przykładowe, statyczne dane** (najbliższy lot, rezerwacje, punkty Qmiles) bez nowych endpointów. Prawdziwe dane podepniemy z backendu później.
+- Dashboard ma **kafelki**: saldo **Avios** (punkty milowe, widoczne też w pasku górnym na każdej stronie), **przebyte mile**, **liczba odbytych lotów**, **nadchodzące rezerwacje** i **przekierowanie do wyszukiwarki lotów** (zewnętrzny link w nowej karcie, adres w `config/brand.ts`).
+- Dane kafelków pochodzą z nowego endpointu `GET /api/dashboard` (na razie mock MSW), ten sam kontrakt dla backend_py i backend_ts. Jeden store zasila kafelki i pasek górny.
+- Popup z agentem jest dostępny na **Dashboardzie i w Wyszukiwarce lotów** (nie na stronie Asystent, gdzie jest pełny czat). Na każdej z tych stron ma własne, pasujące do niej podpowiedzi.
+- Kafelek „Wyszukiwarka lotów” na Dashboardzie prowadzi teraz do **wewnętrznej zakładki Wyszukaj loty**, a nie do zewnętrznej strony.
 - Popup i strona Asystent współdzielą **ten sam store rozmów** i to samo API, więc rozmowa z popupu jest zwykłą rozmową z historii.
 - Zachowanie popupu: pierwsze otwarcie na danej wizycie na Dashboardzie zaczyna **nową rozmowę**. Zamknięcie i ponowne otwarcie kontynuuje ją. Przycisk „Nowa rozmowa” w popupie zaczyna kolejną. Po przejściu do zakładki Asystent ta rozmowa jest otwarta i widoczna na liście rozmów.
 
 ### Etap 7 – Nawigacja i Dashboard
-- **Testy:** zakładki Dashboard / Asystent widoczne tylko po zalogowaniu, aktywna zakładka oznaczona (`aria-current`), klik przełącza stronę; logowanie przekierowuje na `/dashboard`; nieznany adres → `/dashboard`; `/dashboard` chroniony (bez logowania → `/login`); Dashboard pokazuje powitanie z imieniem i karty (najbliższy lot, rezerwacje, Qmiles); układ na telefonie (zakładki mieszczą się bez poziomego przewijania).
-- **Funkcjonalność:** `Header` z nawigacją, trasa `/dashboard`, `DashboardPage` z kartami, aktualizacja przekierowań i testów e2e.
+- **Testy:**
+  - API: `GET /api/dashboard` zwraca saldo, mile, loty i rezerwacje; bez sesji 401.
+  - Store: ładowanie, stan błędu, reset po wylogowaniu.
+  - Header: zakładki Dashboard / Asystent tylko po zalogowaniu, aktywna zakładka oznaczona (`aria-current`), saldo Avios przy użytkowniku (ukryte bez logowania i do czasu załadowania).
+  - Dashboard: powitanie z imieniem; kafelki Avios, Przebyte mile, Odbyte loty; lista nadchodzących rezerwacji i stan pusty; link do wyszukiwarki lotów (nowa karta, `noopener`); stan ładowania i błędu z „Spróbuj ponownie”.
+  - Routing: logowanie → `/dashboard`, nieznany adres → `/dashboard`, `/dashboard` chroniony, przełączanie zakładek, Avios w pasku także na Asystencie, wygaśnięcie sesji przy 401 z `/api/dashboard`.
+  - e2e: kafelki, pasek, zakładki, link; zakładki bez poziomego przewijania na telefonie.
+- **Funkcjonalność:** `dashboardApi` + mock, `dashboardStore`, `DashboardPage` z kafelkami, `Header` z zakładkami i saldem Avios, trasa `/dashboard`, aktualizacja przekierowań i istniejących testów.
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
+
+### Etap 8 – Wyszukiwarka lotów: zakładka i formularz
+- **Zakres formularza:** rodzaj podróży (w obie strony / w jedną stronę), lotnisko wylotu i przylotu z podpowiedziami (po mieście, kodzie lub nazwie) i przyciskiem zamiany miejscami, data wylotu i powrotu, pasażerowie (dorośli, dzieci 2–11, niemowlęta do 2 lat), klasa podróży (Economy / Business / First). Poza zakresem na razie: loty wieloetapowe (multi-city), płatność Avios, rezerwacja i płatność.
+- **Walidacja:** wylot i przylot wymagane i różne; data wylotu nie w przeszłości; powrót nie wcześniej niż wylot (przy podróży w obie strony); co najmniej 1 dorosły, razem maks. 9 pasażerów, niemowląt nie więcej niż dorosłych.
+- **Testy:**
+  - API: `GET /api/airports?q=` filtruje po mieście, kodzie i nazwie (bez rozróżniania wielkości liter i polskich znaków); bez sesji 401.
+  - Formularz: pola i etykiety, ukrycie daty powrotu przy podróży w jedną stronę, podpowiedzi lotnisk (klawiatura i mysz), zamiana miejscami, liczniki pasażerów z granicami, każdy komunikat walidacji, poprawne wysłanie przekazuje komplet danych.
+  - Routing i nawigacja: zakładka „Wyszukaj loty” (`/flights`) w pasku, chroniona; kafelek na Dashboardzie prowadzi do zakładki zamiast do zewnętrznej strony.
+  - e2e: wypełnienie formularza z podpowiedzią lotniska; formularz mieści się na telefonie.
+- **Funkcjonalność:** `airportsApi` + mock, `FlightSearchPage` z formularzem i komponentem wyboru lotniska, trasa `/flights`, zakładka w `Header`, przepięcie kafelka; usunięcie `flightSearchUrl` z konfiguracji.
 - [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
 
-### Etap 8 – Popup z agentem na Dashboardzie
-- **Testy:** ikona agenta (oryks) widoczna tylko na Dashboardzie; klik otwiera dialog „Asystent” z ekranem powitalnym i podpowiedziami; pierwsze otwarcie zaczyna nową rozmowę (nie dziedziczy otwartej w zakładce Asystent); wysłanie wiadomości działa jak w czacie (odpowiedź, karta lotu, „pisze…”, błędy); zamknięcie i ponowne otwarcie kontynuuje rozmowę; „Nowa rozmowa” w popupie zaczyna kolejną; Esc i przycisk zamykają, a fokus wraca na ikonę; rozmowa z popupu jest na liście w zakładce Asystent i otwarta jako aktywna; e2e: Dashboard → popup → wiadomość → Asystent → rozmowa widoczna.
+### Etap 9 – Wyszukiwarka lotów: wyniki
+- **Zakres:** lista ofert dla wylotu i (przy podróży w obie strony) osobno dla powrotu; w ofercie: numer lotu, godziny, czas lotu, przesiadki, cena za całą grupę w wybranej klasie; sortowanie (cena, czas lotu, godzina wylotu); filtr „tylko bezpośrednie”; wybór oferty i podsumowanie z ceną łączną (bez dalszej rezerwacji); stany: ładowanie, brak wyników, błąd z ponowieniem.
+- **Testy:** `GET /api/flights/search` (kontrakt, ceny dla klas i liczby pasażerów, loty powrotne tylko przy dacie powrotu, 400 dla błędnych danych, 401 bez sesji); lista i sortowanie; filtr; wybór i suma; stany pustych wyników i błędu; e2e: wyszukanie, sortowanie, wybór lotu tam i z powrotem; wyniki na telefonie bez poziomego przewijania.
+- **Funkcjonalność:** `flightsApi` + mock (deterministyczne oferty), `flightSearchStore`, komponenty wyników, podsumowanie wyboru.
+- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+
+### Etap 10 – Popup z agentem (Dashboard i Wyszukiwarka lotów)
+- **Testy:** ikona agenta (oryks) widoczna na Dashboardzie i w Wyszukiwarce lotów, ale nie na stronie Asystent; podpowiedzi zależą od strony (na wyszukiwarce m.in. klasy podróży, bagaż, zmiana daty); klik otwiera dialog „Asystent” z ekranem powitalnym i podpowiedziami; pierwsze otwarcie zaczyna nową rozmowę (nie dziedziczy otwartej w zakładce Asystent); wysłanie wiadomości działa jak w czacie (odpowiedź, karta lotu, „pisze…”, błędy); zamknięcie i ponowne otwarcie kontynuuje rozmowę; „Nowa rozmowa” w popupie zaczyna kolejną; Esc i przycisk zamykają, a fokus wraca na ikonę; rozmowa z popupu jest na liście w zakładce Asystent i otwarta jako aktywna; e2e: Dashboard → popup → wiadomość → Asystent → rozmowa widoczna; to samo z Wyszukiwarki lotów.
 - **Funkcjonalność:** `AgentLauncher` (ikona + popup), ponowne użycie `MessageList`, `MessageInput`, `SuggestionChips` i `chatStore`; ładny dialog (animacja wejścia, na telefonie pełny ekran).
 - [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push

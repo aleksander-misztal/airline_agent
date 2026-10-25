@@ -15,7 +15,7 @@ const renderLogin = () =>
     <MemoryRouter initialEntries={["/login"]}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/chat" element={<h1>Czat</h1>} />
+        <Route path="/dashboard" element={<h1>Dashboard</h1>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -62,14 +62,14 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: "Logowanie" })).toBeInTheDocument();
   });
 
-  it("redirects to /chat after logging in with admin/admin", async () => {
+  it("redirects to /dashboard after logging in with admin/admin", async () => {
     renderLogin();
 
     await userEvent.type(screen.getByLabelText("Login"), "admin");
     await userEvent.type(screen.getByLabelText("Hasło"), "admin");
     await userEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
 
-    expect(await screen.findByRole("heading", { name: "Czat" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   });
 
   it("submits with the Enter key", async () => {
@@ -78,7 +78,7 @@ describe("LoginPage", () => {
     await userEvent.type(screen.getByLabelText("Login"), "admin");
     await userEvent.type(screen.getByLabelText("Hasło"), "admin{Enter}");
 
-    expect(await screen.findByRole("heading", { name: "Czat" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   });
 
   it("disables the button while the request is in flight", async () => {

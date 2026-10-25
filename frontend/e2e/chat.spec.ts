@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { logIn, send, sidebar, thread } from "./helpers";
+import { logIn, logInToAssistant, send, sidebar, thread } from "./helpers";
 
 test("redirects an anonymous visitor to the login page", async ({ page }) => {
   await page.goto("/chat");
@@ -19,8 +19,8 @@ test("rejects wrong credentials", async ({ page }) => {
 });
 
 test("login → conversations → logout", async ({ page }) => {
-  await logIn(page);
-  await expect(page.getByText("Administrator")).toBeVisible();
+  await logInToAssistant(page);
+  await expect(page.getByText("Administrator", { exact: true })).toBeVisible();
 
   // pierwsza rozmowa: podpowiedź ze statusem lotu → karta lotu
   await page.getByRole("button", { name: "Status lotu" }).click();
@@ -55,6 +55,6 @@ test("keeps the session after a reload", async ({ page }) => {
 
   await page.reload();
 
-  await expect(page).toHaveURL(/\/chat$/);
-  await expect(page.getByText("Administrator")).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page.getByText("Administrator", { exact: true })).toBeVisible();
 });

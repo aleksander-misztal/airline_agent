@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import type { Conversation, Message, SendMessageResult } from "../types";
 import { botReply } from "./bot";
+import { summary } from "./dashboard";
 import { db, MOCK_USER } from "./db";
 
 const DEFAULT_TITLE = "Nowa rozmowa";
@@ -28,6 +29,8 @@ export const handlers = [
   }),
 
   http.get("*/api/auth/me", () => (db.session ? HttpResponse.json({ user: db.session }) : unauthorized())),
+
+  http.get("*/api/dashboard", () => (db.session ? HttpResponse.json(summary) : unauthorized())),
 
   http.get("*/api/conversations", () => (db.session ? HttpResponse.json(db.conversations) : unauthorized())),
 

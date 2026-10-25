@@ -42,3 +42,22 @@ export type SendMessageResult = {
   userMessage: Message;
   reply: Message;
 };
+
+export type Booking = {
+  reference: string;
+  flightNumber: string;
+  from: string;
+  to: string;
+  departure: string;
+  arrival: string;
+  cabin: string;
+};
+
+export type DashboardSummary = {
+  /** Saldo punktów milowych. */
+  avios: number;
+  milesFlown: number;
+  flightsTaken: number;
+  /** Od najbliższego odlotu. */
+  upcomingBookings: Booking[];
+};

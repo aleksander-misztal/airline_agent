@@ -20,7 +20,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   if (status === "loading") return <PageLoader />;
-  if (status === "authenticated") return <Navigate to="/chat" replace />;
+  if (status === "authenticated") return <Navigate to="/dashboard" replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
