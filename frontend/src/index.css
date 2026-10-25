@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Kolory muszą być zgodne z src/config/brand.ts */
+@theme {
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #5c0632;
+  --color-brand-dark: #45041f;
+  --color-brand-50: #f9eef3;
+  --color-brand-gray: #5c6670;
+  --color-surface: #f5f5f5;
+}
+
+body {
+  @apply bg-surface font-sans text-neutral-900 antialiased;
+}
