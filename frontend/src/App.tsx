@@ -10,6 +10,7 @@ import { useChatStore } from "./features/chat/chatStore";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { useDashboardStore } from "./features/dashboard/dashboardStore";
 import { FlightSearchPage } from "./features/flights/FlightSearchPage";
+import { useFlightSearchStore } from "./features/flights/flightSearchStore";
 
 function RootLayout() {
   const user = useAuthStore((s) => s.user);
@@ -30,6 +31,7 @@ function RootLayout() {
     } else if (status === "anonymous") {
       useChatStore.getState().reset();
       useDashboardStore.getState().reset();
+      useFlightSearchStore.getState().reset();
     }
   }, [status, loadDashboard]);
 

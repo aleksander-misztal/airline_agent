@@ -8,7 +8,7 @@ export function SearchSummary({ criteria }: { criteria: SearchCriteria }) {
   const dates = returnDate ? `${dateOf(departureDate)} – ${dateOf(returnDate)}` : dateOf(departureDate);
 
   return (
-    <section aria-label="Kryteria wyszukiwania" className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-neutral-200 sm:p-6">
+    <section aria-label="Kryteria wyszukiwania" className="border-b border-neutral-200 pb-5">
       <p className="text-xl font-light text-brand">{`${airportLabel(from)} → ${airportLabel(to)}`}</p>
       <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-sm text-neutral-700">
         <div>

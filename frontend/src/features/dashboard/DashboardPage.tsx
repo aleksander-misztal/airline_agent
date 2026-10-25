@@ -76,7 +76,7 @@ export function DashboardPage() {
           ) : (
             <ul className="mt-4 divide-y divide-neutral-200">
               {summary.upcomingBookings.map((b) => (
-                <li key={b.reference} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-3">
+                <li key={`${b.reference}-${b.flightNumber}-${b.departure}`} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-3">
                   <div className="min-w-0">
                     <p className="font-medium text-neutral-900">{`${b.from} → ${b.to}`}</p>
                     <p className="text-sm text-brand-gray">{`${dateOf(b.departure)} · ${timeOf(b.departure)} · ${b.cabin}`}</p>

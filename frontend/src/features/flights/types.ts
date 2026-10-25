@@ -1,7 +1,8 @@
-import type { Airport } from "../../api";
+import type { Airport, Cabin } from "../../api";
+
+export type { Cabin };
 
 export type TripType = "round_trip" | "one_way";
-export type Cabin = "economy" | "business" | "first";
 
 export type Passengers = {
   /** 12+ lat */

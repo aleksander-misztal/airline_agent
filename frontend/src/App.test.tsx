@@ -7,7 +7,7 @@ import { authApi } from "./api";
 import { summary } from "./api/mocks/dashboard";
 import { server } from "./api/mocks/server";
 import { brand } from "./config/brand";
-import { plainNumber } from "./test/utils";
+import { plainNumber, searchFlights } from "./test/utils";
 
 const renderApp = (path: string) =>
   render(
@@ -169,6 +169,47 @@ describe("App routing and session", () => {
     expect(screen.queryByRole("button", { name: "Wyloguj" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Avios/)).not.toBeInTheDocument();
     await expect(authApi.me()).resolves.toBeNull();
+  });
+});
+
+describe("App flight search", () => {
+  it("lets the user find a flight, reserve it and see the reservation on the dashboard", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+    const tile = within(await screen.findByRole("region", { name: "Wyszukiwarka lotów" }));
+    await userEvent.click(tile.getByRole("link", { name: "Wyszukaj loty" }));
+    await flightsHeading();
+
+    await searchFlights();
+    const list = await screen.findByRole("list", { name: "Wyniki wyszukiwania" });
+    const [first] = Array.from(list.children) as HTMLElement[];
+    await userEvent.click(within(first).getByRole("button", { expanded: false }));
+    await userEvent.click(within(first).getByRole("button", { name: "Rezerwuj" }));
+    const confirmation = await within(first).findByRole("status");
+    const reference = confirmation.textContent!.match(/Kod rezerwacji: ([A-Z0-9]{6})/)![1];
+
+    await userEvent.click(mainNav().getByRole("link", { name: "Dashboard" }));
+
+    const bookings = within(await screen.findByRole("region", { name: "Nadchodzące rezerwacje" }));
+    expect((await bookings.findAllByText(reference)).length).toBeGreaterThan(0);
+  });
+
+  it("forgets the search results after logging out", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/flights");
+    await flightsHeading();
+    await searchFlights();
+    await screen.findByRole("list", { name: "Wyniki wyszukiwania" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
+    await loginHeading();
+    await logInThroughForm();
+    await dashboardHeading();
+    await userEvent.click(mainNav().getByRole("link", { name: "Wyszukaj loty" }));
+    await flightsHeading();
+
+    expect(screen.queryByRole("list", { name: "Wyniki wyszukiwania" })).not.toBeInTheDocument();
   });
 });
 

@@ -37,7 +37,7 @@ describe("dashboardApi", () => {
 
     const { upcomingBookings } = await dashboardApi.getSummary();
 
-    const departures = upcomingBookings.map((b) => b.departure);
-    expect([...departures].sort()).toEqual(departures);
+    const instants = upcomingBookings.map((b) => Date.parse(b.departure));
+    expect(instants).toEqual([...instants].sort((a, b) => a - b));
   });
 });

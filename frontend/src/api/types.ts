@@ -69,3 +69,57 @@ export type Airport = {
   country: string;
   name: string;
 };
+
+export type Cabin = "economy" | "business" | "first";
+
+export type FlightSearchParams = {
+  /** Kod IATA lotniska wylotu. */
+  from: string;
+  /** Kod IATA lotniska przylotu. */
+  to: string;
+  /** YYYY-MM-DD */
+  departureDate: string;
+  /** YYYY-MM-DD; null = w jedną stronę */
+  returnDate: string | null;
+  adults: number;
+  children: number;
+  infants: number;
+  cabin: Cabin;
+};
+
+export type FlightSegment = {
+  flightNumber: string;
+  aircraft: string;
+  from: Airport;
+  to: Airport;
+  /** ISO z offsetem lotniska wylotu. */
+  departure: string;
+  /** ISO z offsetem lotniska przylotu. */
+  arrival: string;
+  durationMinutes: number;
+};
+
+/** Jeden kierunek podróży; kilka segmentów = przesiadki. */
+export type Itinerary = {
+  segments: FlightSegment[];
+  /** Od odlotu pierwszego do przylotu ostatniego segmentu, razem z przesiadkami. */
+  durationMinutes: number;
+};
+
+export type FlightOffer = {
+  id: string;
+  /** Cena biletu za całą grupę pasażerów. */
+  price: { amount: number; currency: string };
+  /** 1 element = w jedną stronę, 2 = tam i powrót. */
+  legs: Itinerary[];
+};
+
+export type FlightSearchResult = { offers: FlightOffer[] };
+
+export type BookingRequest = { offerId: string; search: FlightSearchParams };
+
+export type BookingConfirmation = {
+  reference: string;
+  /** Po jednej rezerwacji na każdy kierunek. */
+  bookings: Booking[];
+};

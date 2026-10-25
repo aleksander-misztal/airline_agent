@@ -1,12 +1,5 @@
 import type { Passengers } from "../features/flights/types";
-
-// Polska odmiana: 1 → forma pojedyncza, 2–4 (poza 12–14) → "few", reszta → "many".
-function plural(n: number, one: string, few: string, many: string) {
-  if (n === 1) return one;
-  const lastTwo = n % 100;
-  if (n % 10 >= 2 && n % 10 <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return few;
-  return many;
-}
+import { plural } from "./format";
 
 export function describePassengers({ adults, children, infants }: Passengers): string {
   const parts = [`${adults} ${adults === 1 ? "dorosły" : "dorosłych"}`];

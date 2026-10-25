@@ -4,6 +4,7 @@ import { searchAirports } from "./airports";
 import { botReply } from "./bot";
 import { summary } from "./dashboard";
 import { db, MOCK_USER } from "./db";
+import { bookingsFor, generateOffers, validateSearch } from "./flights";
 
 const DEFAULT_TITLE = "Nowa rozmowa";
 const MAX_TITLE_LENGTH = 40;
@@ -31,7 +32,36 @@ export const handlers = [
 
   http.get("*/api/auth/me", () => (db.session ? HttpResponse.json({ user: db.session }) : unauthorized())),
 
-  http.get("*/api/dashboard", () => (db.session ? HttpResponse.json(summary) : unauthorized())),
+  http.get("*/api/dashboard", () => {
+    if (!db.session) return unauthorized();
+    const upcomingBookings = [...summary.upcomingBookings, ...db.bookings].sort(
+      (a, b) => Date.parse(a.departure) - Date.parse(b.departure),
+    );
+    return HttpResponse.json({ ...summary, upcomingBookings });
+  }),
+
+  http.get("*/api/flights/search", ({ request }) => {
+    if (!db.session) return unauthorized();
+    const query = Object.fromEntries(new URL(request.url).searchParams);
+    const result = validateSearch(query);
+    if (!result.ok) return error(400, result.error);
+    return HttpResponse.json({ offers: generateOffers(result.params) });
+  }),
+
+  http.post("*/api/bookings", async ({ request }) => {
+    if (!db.session) return unauthorized();
+    const body = (await request.json().catch(() => null)) as { offerId?: unknown; search?: Record<string, unknown> } | null;
+    const result = validateSearch(body?.search ?? {});
+    if (!result.ok) return error(400, result.error);
+
+    const offer = generateOffers(result.params).find((o) => o.id === body?.offerId);
+    if (!offer) return error(404, "Nie znaleziono oferty");
+
+    const reference = crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+    const bookings = bookingsFor(offer, result.params.cabin, reference);
+    db.bookings.push(...bookings);
+    return HttpResponse.json({ reference, bookings }, { status: 201 });
+  }),
 
   http.get("*/api/airports", ({ request }) => {
     if (!db.session) return unauthorized();

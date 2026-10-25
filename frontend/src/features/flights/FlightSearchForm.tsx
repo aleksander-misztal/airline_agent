@@ -85,7 +85,7 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-neutral-200 sm:p-8"
+      className="@container rounded-lg bg-white p-5 shadow-sm ring-1 ring-neutral-200 sm:p-8"
     >
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-neutral-800">Rodzaj podróży</legend>
@@ -111,7 +111,7 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
         </div>
       </fieldset>
 
-      <div className="mt-6 grid items-start gap-4 md:grid-cols-[1fr_auto_1fr]">
+      <div className="mt-6 grid items-start gap-4 @lg:grid-cols-[1fr_auto_1fr]">
         <AirportField
           label="Skąd"
           text={fromText}
@@ -130,9 +130,9 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
           type="button"
           onClick={swapAirports}
           aria-label="Zamień lotniska"
-          className="mx-auto flex size-11 cursor-pointer items-center justify-center rounded-full border border-neutral-300 text-brand transition-colors hover:border-brand hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand md:mt-8"
+          className="mx-auto flex size-11 cursor-pointer items-center justify-center rounded-full border border-neutral-300 text-brand transition-colors hover:border-brand hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand @lg:mt-8"
         >
-          <svg viewBox="0 0 24 24" className="size-5 rotate-90 md:rotate-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="size-5 rotate-90 @lg:rotate-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 13l-4 4 4 4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -152,7 +152,7 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
         />
       </div>
 
-      <div className={`mt-4 grid gap-4 ${roundTrip ? "sm:grid-cols-2" : ""}`}>
+      <div className={`mt-4 grid gap-4 ${roundTrip ? "@md:grid-cols-2" : ""}`}>
         <div>
           <label htmlFor="departure-date" className={fieldLabelClass}>
             Data wylotu
@@ -198,7 +198,7 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
         )}
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div className="mt-6 grid gap-6 @2xl:grid-cols-[1.4fr_1fr]">
         <fieldset className="space-y-3">
           <legend className="mb-2 text-sm font-medium text-neutral-800">Pasażerowie</legend>
           <PassengerStepper

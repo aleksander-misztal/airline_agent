@@ -4,6 +4,7 @@ import { resetDb } from "../api/mocks/db";
 import { useAuthStore } from "../features/auth/authStore";
 import { useChatStore } from "../features/chat/chatStore";
 import { useDashboardStore } from "../features/dashboard/dashboardStore";
+import { useFlightSearchStore } from "../features/flights/flightSearchStore";
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
@@ -12,5 +13,6 @@ afterEach(() => {
   useAuthStore.setState(useAuthStore.getInitialState(), true);
   useChatStore.setState(useChatStore.getInitialState(), true);
   useDashboardStore.setState(useDashboardStore.getInitialState(), true);
+  useFlightSearchStore.setState(useFlightSearchStore.getInitialState(), true);
 });
 afterAll(() => server.close());

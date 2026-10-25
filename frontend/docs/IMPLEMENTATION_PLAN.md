@@ -74,9 +74,12 @@ POST   /api/conversations/:id/messages    { content } → Message (odpowiedź ag
 GET    /api/dashboard                     → { avios, milesFlown, flightsTaken, upcomingBookings[] }
 
 GET    /api/airports?q=                   → Airport[]  (podpowiedzi lotnisk po mieście, kodzie lub nazwie)
-GET    /api/flights/search                → { outbound: FlightOffer[], inbound: FlightOffer[] | null }
+GET    /api/flights/search                → { offers: FlightOffer[] }
        ?from&to&departureDate&returnDate?&adults&children&infants&cabin
+POST   /api/bookings                      { offerId, search } → 201 { reference, bookings: Booking[] }
 ```
+
+`FlightOffer` = `{ id, price: { amount, currency }, legs: Itinerary[] }`, gdzie `legs` ma 1 element (w jedną stronę) albo 2 (tam i powrót). `Itinerary` = `{ durationMinutes, segments: FlightSegment[] }`, a `FlightSegment` = `{ flightNumber, aircraft, from, to, departure, arrival, durationMinutes }` (czasy w ISO z offsetem lotniska). Przesiadki wynikają z kolejnych segmentów: `segments.length - 1`, czas przesiadki = odlot następnego minus przylot poprzedniego.
 
 Wiadomość ma typ, żeby łatwo dodawać nowe rodzaje treści:
 
@@ -180,7 +183,20 @@ Nowa strona **Dashboard** z zakładkami **Dashboard** i **Asystent** oraz popup 
 - [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 10 – Wyszukiwarka lotów: wyniki
-- **Zakres:** lista ofert dla wylotu i (przy podróży w obie strony) osobno dla powrotu; w ofercie: numer lotu, godziny, czas lotu, przesiadki, cena za całą grupę w wybranej klasie; sortowanie (cena, czas lotu, godzina wylotu); filtr „tylko bezpośrednie”; wybór oferty i podsumowanie z ceną łączną (bez dalszej rezerwacji); stany: ładowanie, brak wyników, błąd z ponowieniem.
-- **Testy:** `GET /api/flights/search` (kontrakt, ceny dla klas i liczby pasażerów, loty powrotne tylko przy dacie powrotu, 400 dla błędnych danych, 401 bez sesji); lista i sortowanie; filtr; wybór i suma; stany pustych wyników i błędu; e2e: wyszukanie, sortowanie, wybór lotu tam i z powrotem; wyniki na telefonie bez poziomego przewijania.
-- **Funkcjonalność:** `flightsApi` + mock (deterministyczne oferty), `flightSearchStore`, komponenty wyników, podsumowanie wyboru.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- **Układ:** po wyszukaniu okno wyszukiwania przesuwa się **w lewo**, a po prawej pojawia się **symetryczne okno z listą lotów** (te same szerokości; na telefonie wyniki pod formularzem). Formularz pozostaje edytowalny, więc można szybko zmienić kryteria i wyszukać ponownie.
+- **Bez osobnego widoku szczegółów:** oferta **rozwija się w miejscu** (po jednej naraz). W zwiniętej widać godziny, trasę, czas podróży, liczbę przesiadek i cenę. W rozwiniętej:
+  - **pionowa oś czasu** z lotniskami, datami i godzinami;
+  - przy każdym odcinku numer lotu, **samolot** i **czas lotu**;
+  - **czas przesiadki** między odcinkami;
+  - łączny czas podróży, **cena biletu** (za całą grupę) i przycisk **Rezerwuj**.
+  Przy podróży w obie strony oferta ma dwa odcinki trasy (Tam i Powrót) i jedną cenę za całość.
+- **Lista:** sortowanie (najtańsze, najkrótsze, najwcześniejszy wylot), filtr „tylko bezpośrednie”, licznik ofert; stany: ładowanie, brak wyników, błąd z ponowieniem.
+- **Rezerwuj (założenie do potwierdzenia):** przycisk zakłada rezerwację w mocku (`POST /api/bookings`), pokazuje potwierdzenie z kodem rezerwacji, a rezerwacja od razu pojawia się w kafelku „Nadchodzące rezerwacje” na Dashboardzie. **Bez** danych pasażerów i płatności (osobny, późniejszy etap).
+- **Testy:**
+  - API: `GET /api/flights/search` (kontrakt, ciągłość segmentów, spójne czasy i strefy, przesiadki ≥ 45 min, ceny zależne od klasy, dorosłych, dzieci i niemowląt, powrót drożej niż w jedną stronę, deterministyczne wyniki, 400 dla błędnych parametrów, 401 bez sesji); `POST /api/bookings` (201, kod, wpis na Dashboardzie, 404, 400, 401).
+  - Formatowanie: czas trwania, przesiadki, cena, liczba ofert.
+  - Karta oferty: zwinięta i rozwinięta, oś czasu, przesiadka, samolot, cena, Rezerwuj (w trakcie, sukces, błąd), dwa odcinki.
+  - Store i strona: wyszukanie, ładowanie, błąd i ponowienie, sortowanie, filtr, jedna rozwinięta oferta, rezerwacja z odświeżeniem Dashboardu, ponowne wyszukanie.
+  - e2e: okno wyszukiwania po lewej i symetryczne okno wyników po prawej; rozwijanie i oś czasu; rezerwacja widoczna na Dashboardzie; telefon bez poziomego przewijania.
+- **Funkcjonalność:** `flightsApi` i `bookingsApi` + mock (deterministyczne oferty z odległości i stref czasowych lotnisk), `flightSearchStore`, `ResultsPanel`, `OfferCard`, `Timeline`, podział strony na dwie kolumny, formularz dostosowany do połowy szerokości.
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push

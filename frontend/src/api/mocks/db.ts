@@ -1,4 +1,4 @@
-import type { Conversation, Message, User } from "../types";
+import type { Booking, Conversation, Message, User } from "../types";
 
 export const MOCK_USER: User = { id: "u-1", username: "admin", displayName: "Administrator" };
 
@@ -8,6 +8,8 @@ type Db = {
   session: User | null;
   conversations: Conversation[];
   messages: Record<string, Message[]>;
+  /** Rezerwacje założone przez użytkownika (doklejane do tych z Dashboardu). */
+  bookings: Booking[];
 };
 
 // Sesja mocka przeżywa odświeżenie strony (jak ciasteczko); reszta danych żyje w pamięci.
@@ -41,6 +43,7 @@ const createDb = (): Db => {
     },
     conversations: [],
     messages: {},
+    bookings: [],
   };
 };
 
