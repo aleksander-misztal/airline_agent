@@ -170,15 +170,15 @@ Nowa strona **Dashboard** z zakładkami **Dashboard** i **Asystent** oraz popup 
   - Routing i nawigacja: zakładka „Wyszukaj loty” (`/flights`) w pasku, chroniona; kafelek na Dashboardzie prowadzi do zakładki zamiast do zewnętrznej strony.
   - e2e: wypełnienie formularza z podpowiedzią lotniska; formularz mieści się na telefonie.
 - **Funkcjonalność:** `airportsApi` + mock, `FlightSearchPage` z formularzem i komponentem wyboru lotniska, trasa `/flights`, zakładka w `Header`, przepięcie kafelka; usunięcie `flightSearchUrl` z konfiguracji.
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
+
+### Etap 9 – Popup z agentem (Dashboard i Wyszukiwarka lotów)
+- **Testy:** ikona agenta (oryks) widoczna na Dashboardzie i w Wyszukiwarce lotów, ale nie na stronie Asystent; podpowiedzi zależą od strony (na wyszukiwarce m.in. klasy podróży, bagaż, zmiana daty); klik otwiera dialog „Asystent” z ekranem powitalnym i podpowiedziami; pierwsze otwarcie zaczyna nową rozmowę (nie dziedziczy otwartej w zakładce Asystent); wysłanie wiadomości działa jak w czacie (odpowiedź, karta lotu, „pisze…”, błędy); zamknięcie i ponowne otwarcie kontynuuje rozmowę; „Nowa rozmowa” w popupie zaczyna kolejną; Esc i przycisk zamykają, a fokus wraca na ikonę; rozmowa z popupu jest na liście w zakładce Asystent i otwarta jako aktywna; e2e: Dashboard → popup → wiadomość → Asystent → rozmowa widoczna; to samo z Wyszukiwarki lotów.
+- **Funkcjonalność:** `AgentLauncher` (ikona + popup), ponowne użycie `MessageList`, `MessageInput`, `SuggestionChips` i `chatStore`; ładny dialog (animacja wejścia, na telefonie pełny ekran).
 - [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
 
-### Etap 9 – Wyszukiwarka lotów: wyniki
+### Etap 10 – Wyszukiwarka lotów: wyniki
 - **Zakres:** lista ofert dla wylotu i (przy podróży w obie strony) osobno dla powrotu; w ofercie: numer lotu, godziny, czas lotu, przesiadki, cena za całą grupę w wybranej klasie; sortowanie (cena, czas lotu, godzina wylotu); filtr „tylko bezpośrednie”; wybór oferty i podsumowanie z ceną łączną (bez dalszej rezerwacji); stany: ładowanie, brak wyników, błąd z ponowieniem.
 - **Testy:** `GET /api/flights/search` (kontrakt, ceny dla klas i liczby pasażerów, loty powrotne tylko przy dacie powrotu, 400 dla błędnych danych, 401 bez sesji); lista i sortowanie; filtr; wybór i suma; stany pustych wyników i błędu; e2e: wyszukanie, sortowanie, wybór lotu tam i z powrotem; wyniki na telefonie bez poziomego przewijania.
 - **Funkcjonalność:** `flightsApi` + mock (deterministyczne oferty), `flightSearchStore`, komponenty wyników, podsumowanie wyboru.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
-
-### Etap 10 – Popup z agentem (Dashboard i Wyszukiwarka lotów)
-- **Testy:** ikona agenta (oryks) widoczna na Dashboardzie i w Wyszukiwarce lotów, ale nie na stronie Asystent; podpowiedzi zależą od strony (na wyszukiwarce m.in. klasy podróży, bagaż, zmiana daty); klik otwiera dialog „Asystent” z ekranem powitalnym i podpowiedziami; pierwsze otwarcie zaczyna nową rozmowę (nie dziedziczy otwartej w zakładce Asystent); wysłanie wiadomości działa jak w czacie (odpowiedź, karta lotu, „pisze…”, błędy); zamknięcie i ponowne otwarcie kontynuuje rozmowę; „Nowa rozmowa” w popupie zaczyna kolejną; Esc i przycisk zamykają, a fokus wraca na ikonę; rozmowa z popupu jest na liście w zakładce Asystent i otwarta jako aktywna; e2e: Dashboard → popup → wiadomość → Asystent → rozmowa widoczna; to samo z Wyszukiwarki lotów.
-- **Funkcjonalność:** `AgentLauncher` (ikona + popup), ponowne użycie `MessageList`, `MessageInput`, `SuggestionChips` i `chatStore`; ładny dialog (animacja wejścia, na telefonie pełny ekran).
 - [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push

@@ -48,3 +48,13 @@ test("dashboard tiles and header tabs fit the screen width", async ({ page }) =>
   await expect(page.getByRole("link", { name: "Asystent", exact: true })).toBeInViewport();
   expect(await hasHorizontalScroll(page)).toBe(false);
 });
+
+test("flight search form fits the screen width", async ({ page }) => {
+  await logIn(page);
+  await page.getByRole("navigation", { name: "Główna nawigacja" }).getByRole("link", { name: "Wyszukaj loty" }).click();
+
+  await expect(page.getByRole("button", { name: "Szukaj lotów" })).toBeVisible();
+  await page.getByRole("combobox", { name: "Skąd" }).click();
+  await expect(page.getByRole("listbox")).toBeInViewport();
+  expect(await hasHorizontalScroll(page)).toBe(false);
+});

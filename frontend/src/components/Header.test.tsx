@@ -60,7 +60,23 @@ describe("Header navigation", () => {
 
     const nav = screen.getByRole("navigation", { name: "Główna nawigacja" });
     expect(within(nav).getByRole("link", { name: "Dashboard" })).toHaveAttribute("href", "/dashboard");
+    expect(within(nav).getByRole("link", { name: "Wyszukaj loty" })).toHaveAttribute("href", "/flights");
     expect(within(nav).getByRole("link", { name: "Asystent" })).toHaveAttribute("href", "/chat");
+  });
+
+  it("keeps the order Dashboard, Wyszukaj loty, Asystent", () => {
+    renderHeader({ user });
+
+    const names = within(screen.getByRole("navigation", { name: "Główna nawigacja" }))
+      .getAllByRole("link")
+      .map((link) => link.textContent);
+    expect(names).toEqual(["Dashboard", "Wyszukaj loty", "Asystent"]);
+  });
+
+  it("marks the flight search tab as active on /flights", () => {
+    renderHeader({ user }, "/flights");
+
+    expect(screen.getByRole("link", { name: "Wyszukaj loty" })).toHaveAttribute("aria-current", "page");
   });
 
   it("hides the tabs when nobody is logged in", () => {

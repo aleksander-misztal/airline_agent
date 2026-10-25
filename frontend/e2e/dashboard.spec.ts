@@ -12,13 +12,13 @@ test("dashboard shows the tiles and the Avios balance in the header", async ({ p
   await expect(page.getByRole("banner")).toContainText(/48\s250 Avios/);
 });
 
-test("the flight search tile opens an external page in a new tab", async ({ page }) => {
+test("the flight search tile opens the search tab", async ({ page }) => {
   await logIn(page);
 
-  const link = page.getByRole("region", { name: "Wyszukiwarka lotów" }).getByRole("link", { name: "Wyszukaj loty" });
+  await page.getByRole("region", { name: "Wyszukiwarka lotów" }).getByRole("link", { name: "Wyszukaj loty" }).click();
 
-  await expect(link).toHaveAttribute("href", /^https:\/\//);
-  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(page).toHaveURL(/\/flights$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Wyszukaj loty" })).toBeVisible();
 });
 
 test("tabs switch between the dashboard and the assistant, Avios stays in the header", async ({ page }) => {

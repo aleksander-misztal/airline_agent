@@ -5,7 +5,6 @@ import { MemoryRouter } from "react-router";
 import { authApi } from "../../api";
 import { summary } from "../../api/mocks/dashboard";
 import { server } from "../../api/mocks/server";
-import { brand } from "../../config/brand";
 import { plainNumber } from "../../test/utils";
 import { useAuthStore } from "../auth/authStore";
 import { DashboardPage } from "./DashboardPage";
@@ -71,13 +70,12 @@ describe("DashboardPage", () => {
     expect(bookings.queryByRole("listitem")).not.toBeInTheDocument();
   });
 
-  it("links to the flight search in a new tab", async () => {
+  it("links to the flight search tab", async () => {
     renderPage();
 
     const link = (await tile("Wyszukiwarka lotów")).getByRole("link", { name: "Wyszukaj loty" });
-    expect(link).toHaveAttribute("href", brand.flightSearchUrl);
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    expect(link).toHaveAttribute("href", "/flights");
+    expect(link).not.toHaveAttribute("target");
   });
 
   it("shows a loading state while the data is fetched", async () => {

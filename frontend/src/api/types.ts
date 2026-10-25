@@ -61,3 +61,11 @@ export type DashboardSummary = {
   /** Od najbliższego odlotu. */
   upcomingBookings: Booking[];
 };
+
+export type Airport = {
+  /** Kod IATA. */
+  code: string;
+  city: string;
+  country: string;
+  name: string;
+};

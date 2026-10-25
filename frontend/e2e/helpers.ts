@@ -26,3 +26,6 @@ export async function send(page: Page, text: string) {
   await page.getByRole("textbox", { name: "Wiadomość" }).fill(text);
   await page.keyboard.press("Enter");
 }
+
+/** Dzień w formacie YYYY-MM-DD, `days` dni od dziś. */
+export const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);

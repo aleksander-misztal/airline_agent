@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import type { Conversation, Message, SendMessageResult } from "../types";
+import { searchAirports } from "./airports";
 import { botReply } from "./bot";
 import { summary } from "./dashboard";
 import { db, MOCK_USER } from "./db";
@@ -31,6 +32,12 @@ export const handlers = [
   http.get("*/api/auth/me", () => (db.session ? HttpResponse.json({ user: db.session }) : unauthorized())),
 
   http.get("*/api/dashboard", () => (db.session ? HttpResponse.json(summary) : unauthorized())),
+
+  http.get("*/api/airports", ({ request }) => {
+    if (!db.session) return unauthorized();
+    const q = new URL(request.url).searchParams.get("q") ?? "";
+    return HttpResponse.json(searchAirports(q));
+  }),
 
   http.get("*/api/conversations", () => (db.session ? HttpResponse.json(db.conversations) : unauthorized())),
 

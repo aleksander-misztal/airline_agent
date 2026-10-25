@@ -19,6 +19,8 @@ const renderApp = (path: string) =>
 const loginHeading = () => screen.findByRole("heading", { name: "Logowanie" });
 const dashboardHeading = () => screen.findByRole("heading", { level: 1, name: /Dzień dobry/ });
 const chatHeading = () => screen.findByRole("heading", { name: "Czat" });
+const flightsHeading = () => screen.findByRole("heading", { level: 1, name: "Wyszukaj loty" });
+const mainNav = () => within(screen.getByRole("navigation", { name: "Główna nawigacja" }));
 const aviosInHeader = () => screen.findByText(`${plainNumber(summary.avios)} Avios`);
 
 async function logInThroughForm() {
@@ -54,6 +56,33 @@ describe("App routing and session", () => {
     renderApp("/dashboard");
 
     expect(await loginHeading()).toBeInTheDocument();
+  });
+
+  it("redirects an anonymous user from /flights to /login", async () => {
+    renderApp("/flights");
+
+    expect(await loginHeading()).toBeInTheDocument();
+  });
+
+  it("opens the flight search from the tab", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+
+    await userEvent.click(mainNav().getByRole("link", { name: "Wyszukaj loty" }));
+
+    expect(await flightsHeading()).toBeInTheDocument();
+    expect(mainNav().getByRole("link", { name: "Wyszukaj loty" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("opens the flight search from the dashboard tile", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    const tile = within(await screen.findByRole("region", { name: "Wyszukiwarka lotów" }));
+
+    await userEvent.click(tile.getByRole("link", { name: "Wyszukaj loty" }));
+
+    expect(await flightsHeading()).toBeInTheDocument();
   });
 
   it("redirects / to the dashboard when a session exists", async () => {
@@ -199,7 +228,4 @@ describe("brand config", () => {
     expect(brand.logo.oryx).toBe("/brand/logo-oryx.png");
   });
 
-  it("points the flight search to an external https page", () => {
-    expect(brand.flightSearchUrl).toMatch(/^https:\/\//);
-  });
 });

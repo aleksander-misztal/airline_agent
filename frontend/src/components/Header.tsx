@@ -31,10 +31,13 @@ export function Header({ user, avios, onLogout }: HeaderProps) {
         {user && (
           <nav
             aria-label="Główna nawigacja"
-            className="order-last flex w-full gap-6 border-t border-neutral-100 md:order-none md:w-auto md:border-t-0"
+            className="order-last flex w-full gap-5 sm:gap-6 border-t border-neutral-100 md:order-none md:w-auto md:border-t-0"
           >
             <NavLink to="/dashboard" className={tabClass}>
               Dashboard
+            </NavLink>
+            <NavLink to="/flights" className={tabClass}>
+              Wyszukaj loty
             </NavLink>
             <NavLink to="/chat" className={tabClass}>
               Asystent

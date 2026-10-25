@@ -8,6 +8,7 @@ import { ChatPage } from "./features/chat/ChatPage";
 import { useChatStore } from "./features/chat/chatStore";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { useDashboardStore } from "./features/dashboard/dashboardStore";
+import { FlightSearchPage } from "./features/flights/FlightSearchPage";
 
 function RootLayout() {
   const user = useAuthStore((s) => s.user);
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/flights" element={<FlightSearchPage />} />
           <Route path="/chat" element={<ChatPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
