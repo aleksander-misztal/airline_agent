@@ -109,7 +109,7 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 ### Etap 2 – Layout
 - **Testy:** header z logo/nazwą i nawigacją, „Wyloguj” widoczne tylko po zalogowaniu, footer.
 - **Funkcjonalność:** Header, Footer i layout strony w stylu Qatar Airways.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 3 – Logowanie
 - **Testy:** walidacja pustych pól, błędne dane → komunikat, `admin/admin` → `/chat`, wejście na `/chat` bez logowania → `/login`, wylogowanie → `/login`.
