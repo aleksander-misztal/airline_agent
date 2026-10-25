@@ -104,7 +104,7 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 ### Etap 1 – Warstwa API
 - **Testy:** login ok / błędne dane, `me` zalogowany / niezalogowany, lista / tworzenie / usuwanie rozmów, wysłanie wiadomości zwraca odpowiedź bota, obsługa błędów HTTP.
 - **Funkcjonalność:** `src/api/` – typy, klient HTTP, `auth.ts`, `chat.ts`, handlery MSW (`admin/admin`, bot na słowach kluczowych: lot, rezerwacja, bagaż, odprawa).
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 2 – Layout
 - **Testy:** header z logo/nazwą i nawigacją, „Wyloguj” widoczne tylko po zalogowaniu, footer.

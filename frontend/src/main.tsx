@@ -3,8 +3,16 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+async function enableMocking() {
+  if (!import.meta.env.DEV || import.meta.env.VITE_USE_MOCKS === "false") return;
+  const { worker } = await import("./api/mocks/browser");
+  await worker.start({ onUnhandledRequest: "bypass" });
+}
+
+enableMocking().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});
