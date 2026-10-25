@@ -1,4 +1,6 @@
-import { authApi } from "../../api";
+import { http, HttpResponse } from "msw";
+import { authApi, chatApi } from "../../api";
+import { server } from "../../api/mocks/server";
 import { useAuthStore } from "./authStore";
 
 const state = () => useAuthStore.getState();
@@ -54,5 +56,36 @@ describe("authStore", () => {
 
     expect(state()).toMatchObject({ status: "anonymous", user: null });
     await expect(authApi.me()).resolves.toBeNull();
+  });
+});
+
+describe("authStore – session expiry", () => {
+  it("expireSession() ends an authenticated session with a message", async () => {
+    await state().login("admin", "admin");
+
+    state().expireSession();
+
+    expect(state()).toMatchObject({
+      status: "anonymous",
+      user: null,
+      error: "Sesja wygasła. Zaloguj się ponownie.",
+    });
+  });
+
+  it("expireSession() does nothing when nobody is logged in", async () => {
+    await state().init();
+
+    state().expireSession();
+
+    expect(state().error).toBeNull();
+  });
+
+  it("a 401 from the chat API while logged in expires the session", async () => {
+    await state().login("admin", "admin");
+    server.use(http.get("*/api/conversations", () => HttpResponse.json({ error: "x" }, { status: 401 })));
+
+    await chatApi.listConversations().catch(() => {});
+
+    expect(state()).toMatchObject({ status: "anonymous", error: "Sesja wygasła. Zaloguj się ponownie." });
   });
 });

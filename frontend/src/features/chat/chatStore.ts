@@ -20,6 +20,7 @@ type ChatState = {
   deleteConversation: (id: string) => Promise<void>;
   /** Zwraca true, gdy wiadomość poszła i przyszła odpowiedź. */
   sendMessage: (content: string) => Promise<boolean>;
+  dismissError: () => void;
   reset: () => void;
 };
 
@@ -106,6 +107,10 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       }));
       return false;
     }
+  },
+
+  dismissError() {
+    set({ error: null });
   },
 
   reset() {

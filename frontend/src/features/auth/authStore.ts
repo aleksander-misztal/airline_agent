@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ApiError, authApi, type User } from "../../api";
+import { ApiError, authApi, setUnauthorizedHandler, type User } from "../../api";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
 
@@ -11,9 +11,11 @@ type AuthState = {
   init: () => Promise<void>;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  /** Serwer odrzucił sesję w trakcie pracy – wraca ekran logowania z komunikatem. */
+  expireSession: () => void;
 };
 
-export const useAuthStore = create<AuthState>()((set) => ({
+export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
   status: "loading",
   error: null,
@@ -47,4 +49,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
       set({ user: null, status: "anonymous", error: null });
     }
   },
+
+  expireSession() {
+    if (get().status !== "authenticated") return;
+    set({ user: null, status: "anonymous", error: "Sesja wygasła. Zaloguj się ponownie." });
+  },
 }));
+
+setUnauthorizedHandler(() => useAuthStore.getState().expireSession());

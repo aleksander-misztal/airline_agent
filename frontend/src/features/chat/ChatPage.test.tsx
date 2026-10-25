@@ -99,4 +99,16 @@ describe("ChatPage", () => {
     await waitFor(() => expect(box()).toHaveValue("Cześć"));
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
+
+  it("lets the user dismiss the error message", async () => {
+    server.use(
+      http.post("*/api/conversations/:id/messages", () => HttpResponse.json({ error: "Awaria" }, { status: 500 })),
+    );
+    await userEvent.type(box(), "Cześć{Enter}");
+    await screen.findByRole("alert");
+
+    await userEvent.click(screen.getByRole("button", { name: "Zamknij komunikat" }));
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
 });

@@ -280,3 +280,15 @@ describe("chatStore – conversations", () => {
     expect(state().conversations).toEqual([]);
   });
 });
+
+describe("chatStore – errors", () => {
+  it("dismissError() clears the error", async () => {
+    server.use(http.post("*/api/conversations", () => HttpResponse.json({ error: "x" }, { status: 500 })));
+    await state().sendMessage("Cześć");
+    expect(state().error).not.toBeNull();
+
+    state().dismissError();
+
+    expect(state().error).toBeNull();
+  });
+});

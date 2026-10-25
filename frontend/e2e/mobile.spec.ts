@@ -1,0 +1,42 @@
+import { expect, test, type Page } from "@playwright/test";
+import { logIn, send, sidebar, thread } from "./helpers";
+
+const hasHorizontalScroll = (page: Page) =>
+  page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+
+test("login page fits the screen width", async ({ page }) => {
+  await page.goto("/login");
+
+  await expect(page.getByRole("heading", { name: "Logowanie" })).toBeVisible();
+  expect(await hasHorizontalScroll(page)).toBe(false);
+});
+
+test("chat fits the screen and keeps the input reachable", async ({ page }) => {
+  await logIn(page);
+
+  await expect(page.getByRole("textbox", { name: "Wiadomość" })).toBeInViewport();
+  expect(await hasHorizontalScroll(page)).toBe(false);
+});
+
+test("a flight card fits the screen width", async ({ page }) => {
+  await logIn(page);
+
+  await page.getByRole("button", { name: "Status lotu" }).click();
+
+  await expect(thread(page).getByText("QR123", { exact: true })).toBeVisible();
+  expect(await hasHorizontalScroll(page)).toBe(false);
+});
+
+test("conversations live in a drawer", async ({ page }) => {
+  await logIn(page);
+  await send(page, "Ile bagażu mogę zabrać?");
+  await expect(thread(page).getByText(/Bagaż podręczny: do 7 kg/)).toBeVisible();
+  await expect(sidebar(page)).toBeHidden();
+
+  await page.getByRole("button", { name: "Rozmowy" }).click();
+  await expect(sidebar(page)).toBeVisible();
+
+  await sidebar(page).getByRole("button", { name: "Ile bagażu mogę zabrać?", exact: true }).click();
+  await expect(sidebar(page)).toBeHidden();
+  await expect(thread(page).getByText(/Bagaż podręczny: do 7 kg/)).toBeVisible();
+});

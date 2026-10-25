@@ -17,6 +17,7 @@ export function ChatPage() {
   const newConversation = useChatStore((s) => s.newConversation);
   const deleteConversation = useChatStore((s) => s.deleteConversation);
   const sendMessage = useChatStore((s) => s.sendMessage);
+  const dismissError = useChatStore((s) => s.dismissError);
 
   // Na małych ekranach lista rozmów zastępuje czat (szuflada).
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -77,9 +78,22 @@ export function ChatPage() {
           )}
 
           {error && (
-            <p role="alert" className="mx-4 mb-2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-800">
-              {error}
-            </p>
+            <div
+              role="alert"
+              className="mx-4 mb-2 flex items-start justify-between gap-3 rounded-md bg-red-50 px-4 py-2 text-sm text-red-800"
+            >
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={dismissError}
+                aria-label="Zamknij komunikat"
+                className="shrink-0 cursor-pointer rounded p-0.5 hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-red-800"
+              >
+                <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           )}
 
           <div className="border-t border-neutral-200 p-3">

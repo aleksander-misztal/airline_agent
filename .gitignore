@@ -24,3 +24,7 @@ venv/
 
 # Sekrety lokalne (przykłady są commitowane)
 !.env.*.example
+
+# Playwright
+test-results/
+playwright-report/

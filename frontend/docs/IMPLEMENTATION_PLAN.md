@@ -128,5 +128,25 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 
 ### Etap 6 – Dopracowanie
 - **Testy:** e2e Playwright – logowanie → rozmowa → wylogowanie.
-- **Funkcjonalność:** responsywność (mobile), puste stany, obsługa błędów (toast / komunikat).
+- **Funkcjonalność:** responsywność (mobile), puste stany, obsługa błędów: brak połączenia z serwerem, wygaśnięcie sesji (401 → ekran logowania z komunikatem), zamykanie komunikatów, ErrorBoundary na awarie renderowania.
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
+
+## Dodatkowe wymagania (po etapie 6)
+
+Nowa strona **Dashboard** z zakładkami **Dashboard** i **Asystent** oraz popup z agentem na Dashboardzie.
+
+### Założenia
+- Po zalogowaniu użytkownik trafia na **`/dashboard`** (wcześniej `/chat`). Zakładka „Asystent” prowadzi do istniejącego czatu pod `/chat` (adres się nie zmienia, żeby nie ruszać reszty).
+- Dashboard na start ma **przykładowe, statyczne dane** (najbliższy lot, rezerwacje, punkty Qmiles) bez nowych endpointów. Prawdziwe dane podepniemy z backendu później.
+- Popup i strona Asystent współdzielą **ten sam store rozmów** i to samo API, więc rozmowa z popupu jest zwykłą rozmową z historii.
+- Zachowanie popupu: pierwsze otwarcie na danej wizycie na Dashboardzie zaczyna **nową rozmowę**. Zamknięcie i ponowne otwarcie kontynuuje ją. Przycisk „Nowa rozmowa” w popupie zaczyna kolejną. Po przejściu do zakładki Asystent ta rozmowa jest otwarta i widoczna na liście rozmów.
+
+### Etap 7 – Nawigacja i Dashboard
+- **Testy:** zakładki Dashboard / Asystent widoczne tylko po zalogowaniu, aktywna zakładka oznaczona (`aria-current`), klik przełącza stronę; logowanie przekierowuje na `/dashboard`; nieznany adres → `/dashboard`; `/dashboard` chroniony (bez logowania → `/login`); Dashboard pokazuje powitanie z imieniem i karty (najbliższy lot, rezerwacje, Qmiles); układ na telefonie (zakładki mieszczą się bez poziomego przewijania).
+- **Funkcjonalność:** `Header` z nawigacją, trasa `/dashboard`, `DashboardPage` z kartami, aktualizacja przekierowań i testów e2e.
+- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+
+### Etap 8 – Popup z agentem na Dashboardzie
+- **Testy:** ikona agenta (oryks) widoczna tylko na Dashboardzie; klik otwiera dialog „Asystent” z ekranem powitalnym i podpowiedziami; pierwsze otwarcie zaczyna nową rozmowę (nie dziedziczy otwartej w zakładce Asystent); wysłanie wiadomości działa jak w czacie (odpowiedź, karta lotu, „pisze…”, błędy); zamknięcie i ponowne otwarcie kontynuuje rozmowę; „Nowa rozmowa” w popupie zaczyna kolejną; Esc i przycisk zamykają, a fokus wraca na ikonę; rozmowa z popupu jest na liście w zakładce Asystent i otwarta jako aktywna; e2e: Dashboard → popup → wiadomość → Asystent → rozmowa widoczna.
+- **Funkcjonalność:** `AgentLauncher` (ikona + popup), ponowne użycie `MessageList`, `MessageInput`, `SuggestionChips` i `chatStore`; ładny dialog (animacja wejścia, na telefonie pełny ekran).
 - [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push

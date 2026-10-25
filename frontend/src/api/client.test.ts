@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { server } from "./mocks/server";
-import { ApiError, request } from "./client";
+import { ApiError, request, setUnauthorizedHandler } from "./client";
 
 describe("request (HTTP client)", () => {
   it("sends JSON body with credentials and parses JSON response", async () => {
@@ -52,5 +52,48 @@ describe("request (HTTP client)", () => {
     server.use(http.delete("*/api/thing", () => new HttpResponse(null, { status: 204 })));
 
     await expect(request("/api/thing", { method: "DELETE" })).resolves.toBeUndefined();
+  });
+
+  it("wraps network failures in ApiError with status 0", async () => {
+    server.use(http.get("*/api/offline", () => HttpResponse.error()));
+
+    const err = (await request("/api/offline").catch((e) => e)) as ApiError;
+
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.status).toBe(0);
+    expect(err.message).toBe("Brak połączenia z serwerem");
+  });
+});
+
+describe("request – unauthorized handler", () => {
+  afterEach(() => setUnauthorizedHandler(null));
+
+  it("is called on 401 from a regular endpoint", async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+    server.use(http.get("*/api/secret", () => HttpResponse.json({ error: "x" }, { status: 401 })));
+
+    await request("/api/secret").catch(() => {});
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("is not called for auth endpoints (a wrong password is not an expired session)", async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+
+    await request("/api/auth/login", { method: "POST", body: { username: "admin", password: "zle" } }).catch(() => {});
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it("is not called for other errors", async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+    server.use(http.get("*/api/broken", () => HttpResponse.json({ error: "x" }, { status: 500 })));
+
+    await request("/api/broken").catch(() => {});
+
+    expect(handler).not.toHaveBeenCalled();
   });
 });

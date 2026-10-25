@@ -9,20 +9,21 @@ import { useChatStore } from "./features/chat/chatStore";
 
 function RootLayout() {
   const user = useAuthStore((s) => s.user);
+  const status = useAuthStore((s) => s.status);
   const init = useAuthStore((s) => s.init);
   const logout = useAuthStore((s) => s.logout);
-
-  async function handleLogout() {
-    await logout();
-    useChatStore.getState().reset();
-  }
 
   useEffect(() => {
     void init();
   }, [init]);
 
+  // Wylogowanie i wygaśnięcie sesji czyszczą otwarty czat.
+  useEffect(() => {
+    if (status === "anonymous") useChatStore.getState().reset();
+  }, [status]);
+
   return (
-    <AppLayout user={user} onLogout={() => void handleLogout()}>
+    <AppLayout user={user} onLogout={() => void logout()}>
       <Outlet />
     </AppLayout>
   );

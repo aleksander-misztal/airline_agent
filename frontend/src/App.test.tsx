@@ -2,7 +2,9 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import App from "./App";
+import { http, HttpResponse } from "msw";
 import { authApi } from "./api";
+import { server } from "./api/mocks/server";
 import { brand } from "./config/brand";
 
 const renderApp = (path: string) =>
@@ -111,6 +113,22 @@ describe("App chat session", () => {
     expect(screen.getByText("W czym mogę pomóc?")).toBeInTheDocument();
     const history = within(screen.getByRole("navigation", { name: "Rozmowy" }));
     expect(await history.findByRole("button", { name: "Cześć" })).toBeInTheDocument();
+  });
+});
+
+describe("App session expiry", () => {
+  it("returns to the login page with a message when the session expires mid-chat", async () => {
+    renderApp("/login");
+    await loginHeading();
+    await logInThroughForm();
+    await chatHeading();
+    server.use(http.post("*/api/conversations", () => HttpResponse.json({ error: "x" }, { status: 401 })));
+
+    await userEvent.type(screen.getByRole("textbox", { name: "Wiadomość" }), "Cześć{Enter}");
+
+    expect(await loginHeading()).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Sesja wygasła. Zaloguj się ponownie.");
+    expect(screen.queryByRole("button", { name: "Wyloguj" })).not.toBeInTheDocument();
   });
 });
 
