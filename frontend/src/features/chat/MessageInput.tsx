@@ -6,9 +6,10 @@ type MessageInputProps = {
   /** Zwrócone false oznacza błąd – wpisany tekst wraca do pola. */
   onSend: (text: string) => Promise<boolean> | boolean | void;
   disabled?: boolean;
+  autoFocus?: boolean;
 };
 
-export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
+export function MessageInput({ onSend, disabled = false, autoFocus = false }: MessageInputProps) {
   const [value, setValue] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
   const canSend = !disabled && value.trim().length > 0;
@@ -45,6 +46,7 @@ export function MessageInput({ onSend, disabled = false }: MessageInputProps) {
     <form onSubmit={handleSubmit} className="flex items-end gap-2">
       <textarea
         ref={ref}
+        autoFocus={autoFocus}
         rows={1}
         value={value}
         onChange={(e) => setValue(e.target.value)}

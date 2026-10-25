@@ -27,4 +27,13 @@ describe("SuggestionChips", () => {
 
     for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
   });
+
+  it("shows custom suggestions instead of the default ones", async () => {
+    const onSelect = vi.fn();
+    render(<SuggestionChips onSelect={onSelect} items={[{ label: "Własna", prompt: "Własne pytanie testowe" }]} />);
+
+    expect(screen.queryByRole("button", { name: "Bagaż" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Własna" }));
+    expect(onSelect).toHaveBeenCalledWith("Własne pytanie testowe");
+  });
 });

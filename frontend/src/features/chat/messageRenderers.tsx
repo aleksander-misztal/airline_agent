@@ -22,7 +22,7 @@ function FlightCardMessage({ message }: RendererProps<"flight_card">) {
   const { flightNumber, from, to, departure, arrival, status, gate } = message.payload;
 
   return (
-    <article className="w-72 overflow-hidden rounded-lg bg-white text-neutral-900 ring-1 ring-neutral-200 sm:w-96">
+    <article className="w-72 max-w-full overflow-hidden rounded-lg bg-white text-neutral-900 ring-1 ring-neutral-200 @md:w-96">
       <header className="flex items-center justify-between bg-brand px-4 py-2 text-white">
         <span className="font-medium tracking-wide">{flightNumber}</span>
         <span className="rounded-full bg-white/15 px-3 py-0.5 text-xs">{status}</span>

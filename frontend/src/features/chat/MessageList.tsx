@@ -17,7 +17,7 @@ export function MessageList({ messages, sending }: MessageListProps) {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
-      <ul aria-label="Wiadomości" className="space-y-4">
+      <ul aria-label="Wiadomości" className="@container space-y-4">
         {messages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}

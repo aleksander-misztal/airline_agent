@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router";
 import { AppLayout } from "./components/AppLayout";
+import { AgentLauncher } from "./features/agent/AgentLauncher";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { useAuthStore } from "./features/auth/authStore";
@@ -35,6 +36,7 @@ function RootLayout() {
   return (
     <AppLayout user={user} avios={avios} onLogout={() => void logout()}>
       <Outlet />
+      {user && <AgentLauncher />}
     </AppLayout>
   );
 }

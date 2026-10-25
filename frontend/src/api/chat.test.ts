@@ -98,6 +98,10 @@ describe("chatApi – messages", () => {
     ["Ile bagażu mogę zabrać?", /bagaż/i],
     ["Chcę zmienić rezerwację", /rezerwac/i],
     ["Jak zrobić odprawę online?", /odpraw/i],
+    ["Ile mam punktów Avios?", /Avios/],
+    ["Czym różnią się klasy Economy, Business i First?", /Economy.*Business.*First/s],
+    ["Czy mogę zmienić datę lotu?", /datę/i],
+    ["Jak podróżować z dzieckiem lub niemowlęciem?", /niemowlęt/i],
   ])("answers keyword question: %s", async (question, expected) => {
     const { reply } = await chatApi.sendMessage(conversationId, question);
 

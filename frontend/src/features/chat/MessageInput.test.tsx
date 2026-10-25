@@ -90,4 +90,10 @@ describe("MessageInput", () => {
     await vi.waitFor(() => expect(onSend).toHaveBeenCalled());
     expect(box).toHaveValue("Druga");
   });
+
+  it("can take the focus on mount", () => {
+    render(<MessageInput onSend={vi.fn()} autoFocus />);
+
+    expect(screen.getByRole("textbox", { name: "Wiadomość" })).toHaveFocus();
+  });
 });

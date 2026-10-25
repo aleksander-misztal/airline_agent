@@ -1,14 +1,16 @@
-import { suggestions } from "./suggestions";
+import { suggestions as defaultSuggestions, type Suggestion } from "./suggestions";
 
 type SuggestionChipsProps = {
   onSelect: (prompt: string) => void;
   disabled?: boolean;
+  /** Własne podpowiedzi; domyślnie ogólne. */
+  items?: Suggestion[];
 };
 
-export function SuggestionChips({ onSelect, disabled = false }: SuggestionChipsProps) {
+export function SuggestionChips({ onSelect, disabled = false, items = defaultSuggestions }: SuggestionChipsProps) {
   return (
     <div className="flex flex-wrap justify-center gap-2">
-      {suggestions.map(({ label, prompt }) => (
+      {items.map(({ label, prompt }) => (
         <button
           key={label}
           type="button"

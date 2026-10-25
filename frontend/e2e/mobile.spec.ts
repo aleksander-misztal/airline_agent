@@ -58,3 +58,21 @@ test("flight search form fits the screen width", async ({ page }) => {
   await expect(page.getByRole("listbox")).toBeInViewport();
   expect(await hasHorizontalScroll(page)).toBe(false);
 });
+
+test("the assistant popup takes the whole screen and fits its width", async ({ page }) => {
+  await logIn(page);
+
+  await page.getByRole("button", { name: "Otwórz asystenta" }).click();
+
+  const popup = page.getByRole("dialog", { name: "Asystent" });
+  await expect(popup).toBeVisible();
+  const box = await popup.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.width).toBeGreaterThanOrEqual(viewport.width - 1);
+  expect(box!.height).toBeGreaterThanOrEqual(viewport.height - 1);
+  await expect(popup.getByRole("textbox", { name: "Wiadomość" })).toBeInViewport();
+  expect(await hasHorizontalScroll(page)).toBe(false);
+
+  await popup.getByRole("button", { name: "Zamknij asystenta" }).click();
+  await expect(popup).toBeHidden();
+});

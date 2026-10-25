@@ -172,6 +172,88 @@ describe("App routing and session", () => {
   });
 });
 
+describe("App assistant popup", () => {
+  const popupIcon = () => screen.queryByRole("button", { name: "Otwórz asystenta" });
+
+  it("is not offered before logging in", async () => {
+    renderApp("/login");
+
+    await loginHeading();
+    expect(popupIcon()).not.toBeInTheDocument();
+  });
+
+  it("is offered on every page except the Asystent tab", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+    expect(popupIcon()).toBeInTheDocument();
+
+    await userEvent.click(mainNav().getByRole("link", { name: "Wyszukaj loty" }));
+    await flightsHeading();
+    expect(popupIcon()).toBeInTheDocument();
+
+    await openAssistantTab();
+    expect(popupIcon()).not.toBeInTheDocument();
+  });
+
+  it("keeps the popup conversation when moving between pages", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+    await userEvent.click(screen.getByRole("button", { name: "Otwórz asystenta" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Asystent" }));
+    await userEvent.type(dialog.getByRole("textbox", { name: "Wiadomość" }), "Cześć{Enter}");
+    await within(dialog.getByRole("list", { name: "Wiadomości" })).findByText("Cześć");
+    await userEvent.click(dialog.getByRole("button", { name: "Zamknij asystenta" }));
+
+    await userEvent.click(mainNav().getByRole("link", { name: "Wyszukaj loty" }));
+    await flightsHeading();
+    await userEvent.click(screen.getByRole("button", { name: "Otwórz asystenta" }));
+
+    const reopened = within(screen.getByRole("dialog", { name: "Asystent" }));
+    expect(reopened.getByRole("list", { name: "Wiadomości" })).toHaveTextContent("Cześć");
+  });
+
+  it("shows the popup conversation in the Asystent tab, on the list and opened", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+    await userEvent.click(screen.getByRole("button", { name: "Otwórz asystenta" }));
+    const dialog = within(screen.getByRole("dialog", { name: "Asystent" }));
+    await userEvent.click(dialog.getByRole("button", { name: "Status lotu" }));
+    await dialog.findByText("Planowy");
+
+    await userEvent.click(mainNav().getByRole("link", { name: "Asystent" }));
+    await chatHeading();
+
+    const history = within(screen.getByRole("navigation", { name: "Rozmowy" }));
+    const item = await history.findByRole("button", { name: "Jaki jest status mojego lotu QR123?" });
+    expect(item).toHaveAttribute("aria-current", "true");
+    const thread = within(screen.getByRole("list", { name: "Wiadomości" }));
+    expect(thread.getByText("Planowy")).toBeInTheDocument();
+  });
+
+  it("starts a fresh popup conversation after a visit to the Asystent tab", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/dashboard");
+    await dashboardHeading();
+    await userEvent.click(screen.getByRole("button", { name: "Otwórz asystenta" }));
+    const first = within(screen.getByRole("dialog", { name: "Asystent" }));
+    await userEvent.type(first.getByRole("textbox", { name: "Wiadomość" }), "Cześć{Enter}");
+    await within(first.getByRole("list", { name: "Wiadomości" })).findByText("Cześć");
+    await userEvent.click(first.getByRole("button", { name: "Zamknij asystenta" }));
+
+    await openAssistantTab();
+    await userEvent.click(mainNav().getByRole("link", { name: "Dashboard" }));
+    await dashboardHeading();
+    await userEvent.click(screen.getByRole("button", { name: "Otwórz asystenta" }));
+
+    const second = within(screen.getByRole("dialog", { name: "Asystent" }));
+    expect(second.queryByRole("list", { name: "Wiadomości" })).not.toBeInTheDocument();
+    expect(second.getByText("W czym mogę pomóc?")).toBeInTheDocument();
+  });
+});
+
 describe("App chat session", () => {
   it("clears the open chat on logout, while history stays available after logging in again", async () => {
     renderApp("/login");
