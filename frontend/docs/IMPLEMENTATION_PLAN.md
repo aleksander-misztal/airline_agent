@@ -114,7 +114,7 @@ Później: `POST /api/conversations/:id/messages/stream` (SSE) do odpowiedzi na 
 ### Etap 3 – Logowanie
 - **Testy:** walidacja pustych pól, błędne dane → komunikat, `admin/admin` → `/chat`, wejście na `/chat` bez logowania → `/login`, wylogowanie → `/login`.
 - **Funkcjonalność:** LoginPage z hero, store sesji (Zustand), ProtectedRoute.
-- [ ] testy · [ ] implementacja · [ ] akceptacja · [ ] push
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push
 
 ### Etap 4 – Czat
 - **Testy:** wysłanie wiadomości → pojawia się w liście → odpowiedź bota; wskaźnik „pisze…”; Enter wysyła, Shift+Enter nowa linia; klik w szybką podpowiedź wysyła ją; renderowanie wiadomości wg `type` (nieznany typ → fallback).

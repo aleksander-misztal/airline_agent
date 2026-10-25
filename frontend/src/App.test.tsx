@@ -1,17 +1,95 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router";
 import App from "./App";
+import { authApi } from "./api";
 import { brand } from "./config/brand";
 
+const renderApp = (path: string) =>
+  render(
+    <MemoryRouter initialEntries={[path]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+const loginHeading = () => screen.findByRole("heading", { name: "Logowanie" });
+const chatHeading = () => screen.findByRole("heading", { name: "Czat" });
+
+async function logInThroughForm() {
+  await userEvent.type(screen.getByLabelText("Login"), "admin");
+  await userEvent.type(screen.getByLabelText("Hasło"), "admin");
+  await userEvent.click(screen.getByRole("button", { name: "Zaloguj się" }));
+}
+
 describe("App (smoke)", () => {
-  it("renders without crashing", () => {
-    render(<App />);
+  it("renders the layout with the brand logo", async () => {
+    renderApp("/login");
+
+    await loginHeading();
     expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: brand.name })).toHaveAttribute("src", brand.logo.full);
+  });
+});
+
+describe("App routing and session", () => {
+  it("redirects an anonymous user from /chat to /login", async () => {
+    renderApp("/chat");
+
+    expect(await loginHeading()).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Czat" })).not.toBeInTheDocument();
   });
 
-  it("shows the brand logo", () => {
-    render(<App />);
-    const logo = screen.getByRole("img", { name: brand.name });
-    expect(logo).toHaveAttribute("src", brand.logo.full);
+  it("redirects / to /chat when a session exists", async () => {
+    await authApi.login("admin", "admin");
+
+    renderApp("/");
+
+    expect(await chatHeading()).toBeInTheDocument();
+  });
+
+  it("redirects / to /login when there is no session", async () => {
+    renderApp("/");
+
+    expect(await loginHeading()).toBeInTheDocument();
+  });
+
+  it("redirects a logged-in user from /login to /chat", async () => {
+    await authApi.login("admin", "admin");
+
+    renderApp("/login");
+
+    expect(await chatHeading()).toBeInTheDocument();
+  });
+
+  it("hides user info and logout while anonymous", async () => {
+    renderApp("/login");
+
+    await loginHeading();
+    expect(screen.queryByRole("button", { name: "Wyloguj" })).not.toBeInTheDocument();
+  });
+
+  it("logs in through the form and shows the user in the header", async () => {
+    renderApp("/login");
+    await loginHeading();
+
+    await logInThroughForm();
+
+    expect(await chatHeading()).toBeInTheDocument();
+    expect(screen.getByText("Administrator")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Wyloguj" })).toBeInTheDocument();
+  });
+
+  it("logs out and returns to /login", async () => {
+    renderApp("/login");
+    await loginHeading();
+    await logInThroughForm();
+    await chatHeading();
+
+    await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
+
+    expect(await loginHeading()).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Wyloguj" })).not.toBeInTheDocument();
+    await expect(authApi.me()).resolves.toBeNull();
   });
 });
 

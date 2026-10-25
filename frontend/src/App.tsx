@@ -1,17 +1,37 @@
-import { BrowserRouter } from "react-router";
+import { useEffect } from "react";
+import { Navigate, Outlet, Route, Routes } from "react-router";
 import { AppLayout } from "./components/AppLayout";
-import { brand } from "./config/brand";
+import { LoginPage } from "./features/auth/LoginPage";
+import { ProtectedRoute } from "./features/auth/ProtectedRoute";
+import { useAuthStore } from "./features/auth/authStore";
+import { ChatPage } from "./features/chat/ChatPage";
+
+function RootLayout() {
+  const user = useAuthStore((s) => s.user);
+  const init = useAuthStore((s) => s.init);
+  const logout = useAuthStore((s) => s.logout);
+
+  useEffect(() => {
+    void init();
+  }, [init]);
+
+  return (
+    <AppLayout user={user} onLogout={() => void logout()}>
+      <Outlet />
+    </AppLayout>
+  );
+}
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppLayout>
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-3xl font-light tracking-wide text-brand">{brand.assistantName}</h1>
-          <div className="h-1 w-16 rounded-full bg-brand" />
-          <p className="text-brand-gray">Logowanie i czat – wkrótce.</p>
-        </div>
-      </AppLayout>
-    </BrowserRouter>
+    <Routes>
+      <Route element={<RootLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/chat" element={<ChatPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/chat" replace />} />
+      </Route>
+    </Routes>
   );
 }
