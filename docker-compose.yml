@@ -1,0 +1,48 @@
+# Hoppscotch on-prem (community edition, obraz all-in-one) do testowania API backendów.
+#   docker compose up -d
+# App: http://localhost:3000 · Admin: http://localhost:3100 · Backend: http://localhost:3170
+# Konfiguracja: .env.hoppscotch (kopia z .env.hoppscotch.example, poza gitem).
+
+services:
+  hoppscotch-db:
+    image: postgres:15
+    restart: unless-stopped
+    env_file: .env.hoppscotch
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: hoppscotch
+    volumes:
+      - hoppscotch-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hoppscotch"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Jednorazowa migracja bazy – AIO startuje dopiero po jej zakończeniu.
+  hoppscotch-migrate:
+    image: hoppscotch/hoppscotch:latest
+    env_file: .env.hoppscotch
+    command: pnpm exec prisma migrate deploy
+    depends_on:
+      hoppscotch-db:
+        condition: service_healthy
+    restart: "no"
+
+  hoppscotch-aio:
+    image: hoppscotch/hoppscotch:latest
+    container_name: hoppscotch-aio
+    restart: unless-stopped
+    env_file: .env.hoppscotch
+    depends_on:
+      hoppscotch-db:
+        condition: service_healthy
+      hoppscotch-migrate:
+        condition: service_completed_successfully
+    ports:
+      - "3000:3000" # aplikacja
+      - "3100:3100" # panel admina
+      - "3170:3170" # backend (GraphQL / REST)
+
+volumes:
+  hoppscotch-db-data:

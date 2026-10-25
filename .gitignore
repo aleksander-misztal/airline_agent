@@ -21,3 +21,6 @@ venv/
 
 # TypeScript
 *.tsbuildinfo
+
+# Sekrety lokalne (przykłady są commitowane)
+!.env.*.example
