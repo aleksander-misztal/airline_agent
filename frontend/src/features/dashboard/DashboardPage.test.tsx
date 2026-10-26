@@ -81,7 +81,7 @@ describe("DashboardPage", () => {
   it("shows a loading state while the data is fetched", async () => {
     server.use(
       http.get("*/api/dashboard", async () => {
-        await delay(150);
+        await delay(500);
         return HttpResponse.json(summary);
       }),
     );

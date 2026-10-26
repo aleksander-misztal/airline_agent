@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { authApi } from "../../api";
+import { criteria as savedCriteria } from "../../test/fixtures";
 import { FlightSearchForm } from "./FlightSearchForm";
 
 const TODAY = "2026-11-01";
@@ -304,5 +305,85 @@ describe("FlightSearchForm – submit", () => {
     await submit();
 
     expect(onSearch).toHaveBeenCalledWith(expect.objectContaining({ tripType: "one_way", returnDate: null }));
+  });
+});
+
+describe("FlightSearchForm – prefilled", () => {
+  const renderPrefilled = (initial = savedCriteria, notice?: string) => {
+    const onSearch = vi.fn();
+    render(<FlightSearchForm today={TODAY} onSearch={onSearch} initial={initial} notice={notice} />);
+    return onSearch;
+  };
+
+  it("starts with the saved search filled in", () => {
+    renderPrefilled();
+
+    expect(screen.getByRole("radio", { name: "W obie strony" })).toBeChecked();
+    expect(airportBox("Skąd")).toHaveValue("Warszawa (WAW)");
+    expect(airportBox("Dokąd")).toHaveValue("Doha (DOH)");
+    expect(screen.getByLabelText("Data wylotu")).toHaveValue("2026-11-10");
+    expect(screen.getByLabelText("Data powrotu")).toHaveValue("2026-11-20");
+    expect(group("Dorośli").getByText("2")).toBeInTheDocument();
+    expect(group("Dzieci").getByText("1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Klasa podróży")).toHaveValue("economy");
+  });
+
+  it("searches with the saved criteria without any further input", async () => {
+    const onSearch = renderPrefilled();
+
+    await submit();
+
+    expect(onSearch).toHaveBeenCalledWith(savedCriteria);
+  });
+
+  it("restores a one-way trip without the return date", () => {
+    renderPrefilled({ ...savedCriteria, tripType: "one_way", returnDate: null, cabin: "business" });
+
+    expect(screen.getByRole("radio", { name: "W jedną stronę" })).toBeChecked();
+    expect(screen.queryByLabelText("Data powrotu")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Klasa podróży")).toHaveValue("business");
+  });
+
+  it("can still be edited before searching", async () => {
+    const onSearch = renderPrefilled();
+
+    await userEvent.selectOptions(screen.getByLabelText("Klasa podróży"), "first");
+    await submit();
+
+    expect(onSearch).toHaveBeenCalledWith({ ...savedCriteria, cabin: "first" });
+  });
+
+  it("leaves empty dates empty and asks for them", async () => {
+    const onSearch = renderPrefilled({ ...savedCriteria, departureDate: "", returnDate: null });
+
+    expect(screen.getByLabelText("Data wylotu")).toHaveValue("");
+    await submit();
+
+    expect(screen.getByText("Podaj datę wylotu")).toBeInTheDocument();
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("shows a notice above the form", () => {
+    renderPrefilled(savedCriteria, "Daty z zapisanego wyszukiwania już minęły – wybierz nowe");
+
+    expect(screen.getByText("Daty z zapisanego wyszukiwania już minęły – wybierz nowe")).toBeInTheDocument();
+  });
+
+  it("brings the form into view and focuses the departure date when there is a notice", () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    renderPrefilled({ ...savedCriteria, departureDate: "", returnDate: null }, "Wybierz nowe daty");
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText("Data wylotu")).toHaveFocus();
+    // @ts-expect-error – sprzątanie stuba po teście
+    delete Element.prototype.scrollIntoView;
+  });
+
+  it("does not steal the focus when there is no notice", () => {
+    renderPrefilled();
+
+    expect(screen.getByLabelText("Data wylotu")).not.toHaveFocus();
   });
 });

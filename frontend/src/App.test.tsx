@@ -195,6 +195,24 @@ describe("App flight search", () => {
     expect((await bookings.findAllByText(reference)).length).toBeGreaterThan(0);
   });
 
+  it("keeps the recent searches of the user after logging out and in again", async () => {
+    await authApi.login("admin", "admin");
+    renderApp("/flights");
+    await flightsHeading();
+    await searchFlights();
+    await screen.findByRole("region", { name: "Ostatnie wyszukiwania" });
+
+    await userEvent.click(screen.getByRole("button", { name: "Wyloguj" }));
+    await loginHeading();
+    await logInThroughForm();
+    await dashboardHeading();
+    await userEvent.click(mainNav().getByRole("link", { name: "Wyszukaj loty" }));
+    await flightsHeading();
+
+    const history = within(await screen.findByRole("region", { name: "Ostatnie wyszukiwania" }));
+    expect(history.getByRole("listitem")).toHaveTextContent("Warszawa (WAW) → Doha (DOH)");
+  });
+
   it("forgets the search results after logging out", async () => {
     await authApi.login("admin", "admin");
     renderApp("/flights");

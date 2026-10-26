@@ -4,6 +4,7 @@ import type { SearchCriteria } from "../features/flights/types";
 export const WAW: Airport = { code: "WAW", city: "Warszawa", country: "Polska", name: "Warsaw Chopin Airport" };
 export const DOH: Airport = { code: "DOH", city: "Doha", country: "Katar", name: "Hamad International Airport" };
 export const IST: Airport = { code: "IST", city: "Stambuł", country: "Turcja", name: "Istanbul Airport" };
+export const IST_AIRPORT = IST;
 
 const segment = (s: Omit<FlightSegment, "durationMinutes"> & { durationMinutes: number }): FlightSegment => s;
 

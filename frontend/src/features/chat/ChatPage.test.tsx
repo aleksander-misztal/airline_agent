@@ -46,7 +46,7 @@ describe("ChatPage", () => {
   it("shows the typing indicator while waiting for the reply", async () => {
     server.use(
       http.post("*/api/conversations/:id/messages", async () => {
-        await delay(150);
+        await delay(500);
         const base = { conversationId: "c", createdAt: "2026-11-01T10:00:00Z", type: "text" };
         return HttpResponse.json(
           {

@@ -200,3 +200,15 @@ Nowa strona **Dashboard** z zakładkami **Dashboard** i **Asystent** oraz popup 
   - e2e: okno wyszukiwania po lewej i symetryczne okno wyników po prawej; rozwijanie i oś czasu; rezerwacja widoczna na Dashboardzie; telefon bez poziomego przewijania.
 - **Funkcjonalność:** `flightsApi` i `bookingsApi` + mock (deterministyczne oferty z odległości i stref czasowych lotnisk), `flightSearchStore`, `ResultsPanel`, `OfferCard`, `Timeline`, podział strony na dwie kolumny, formularz dostosowany do połowy szerokości.
 - [x] testy · [x] implementacja · [x] akceptacja · [x] push
+
+### Etap 11 – Ostatnie wyszukiwania lotów
+- **Zakres:** ostatnie wyszukiwania zapisują się **w przeglądarce** (`localStorage`) i są pod ręką na stronie Wyszukaj loty, w lewym oknie pod formularzem. Klik w pozycję **wypełnia formularz i od razu szuka**. Lista pokazuje trasę, daty, pasażerów i klasę.
+- **Zasady:**
+  - ostatnie 5 wyszukiwań, najnowsze na górze; to samo wyszukiwanie dwa razy to jedna pozycja (przesuwa się na górę);
+  - osobna lista dla każdego użytkownika (klucz po id użytkownika), przeżywa odświeżenie strony oraz wylogowanie i ponowne zalogowanie;
+  - pozycje można usuwać pojedynczo i wyczyścić całą historię;
+  - **zapisane wyszukiwanie z datami z przeszłości:** formularz wypełnia się trasą, pasażerami i klasą, ale daty zostają puste, pojawia się komunikat „Daty z zapisanego wyszukiwania już minęły – wybierz nowe” i wyszukiwanie **nie** rusza (taka pozycja ma też znacznik „Daty minęły”); strona przewija się wtedy do formularza i ustawia kursor w polu daty wylotu;
+  - uszkodzone dane w `localStorage` i niedostępny `localStorage` nie psują strony.
+- **Testy:** magazyn historii (kolejność, duplikaty, limit 5, trwałość po „odświeżeniu”, osobne listy użytkowników, usuwanie i czyszczenie, uszkodzony JSON i zły kształt danych, brak dostępu do storage); lista (puste = nic, treść pozycji, wywołanie, znacznik minionych dat, usuwanie, czyszczenie); formularz z danymi początkowymi i komunikatem; strona (zapamiętanie, brak duplikatów, trwałość, szybkie wywołanie z wyszukiwaniem, minione daty); aplikacja (historia po wylogowaniu i zalogowaniu); e2e z odświeżeniem strony.
+- **Funkcjonalność:** `recentSearchesStore` z zapisem, `RecentSearches`, dane początkowe i komunikat w `FlightSearchForm`, podpięcie na stronie.
+- [x] testy · [x] implementacja · [x] akceptacja · [x] push

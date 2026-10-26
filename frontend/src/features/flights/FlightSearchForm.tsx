@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Airport } from "../../api";
 import { todayISO } from "../../lib/date";
 import { AirportField, airportLabel } from "./AirportField";
@@ -17,6 +17,10 @@ type FormErrors = Partial<Record<"from" | "to" | "departureDate" | "returnDate",
 
 type FlightSearchFormProps = {
   onSearch: (criteria: SearchCriteria) => void;
+  /** Dane, którymi formularz startuje (np. zapisane wyszukiwanie); puste daty zostają puste. */
+  initial?: SearchCriteria;
+  /** Krótki komunikat nad formularzem. */
+  notice?: string;
   /** Dzisiejsza data (YYYY-MM-DD); do testów. */
   today?: string;
 };
@@ -25,17 +29,26 @@ const fieldLabelClass = "mb-1.5 block text-sm font-medium text-neutral-800";
 const inputClass =
   "w-full rounded-md border border-neutral-300 bg-white px-4 py-3 text-base outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20 aria-[invalid=true]:border-red-600";
 
-export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchFormProps) {
-  const [tripType, setTripType] = useState<TripType>("round_trip");
-  const [from, setFrom] = useState<Airport | null>(null);
-  const [fromText, setFromText] = useState("");
-  const [to, setTo] = useState<Airport | null>(null);
-  const [toText, setToText] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [passengers, setPassengers] = useState<Passengers>({ adults: 1, children: 0, infants: 0 });
-  const [cabin, setCabin] = useState<Cabin>("economy");
+export function FlightSearchForm({ onSearch, initial, notice, today = todayISO() }: FlightSearchFormProps) {
+  const [tripType, setTripType] = useState<TripType>(initial?.tripType ?? "round_trip");
+  const [from, setFrom] = useState<Airport | null>(initial?.from ?? null);
+  const [fromText, setFromText] = useState(initial ? airportLabel(initial.from) : "");
+  const [to, setTo] = useState<Airport | null>(initial?.to ?? null);
+  const [toText, setToText] = useState(initial ? airportLabel(initial.to) : "");
+  const [departureDate, setDepartureDate] = useState(initial?.departureDate ?? "");
+  const [returnDate, setReturnDate] = useState(initial?.returnDate ?? "");
+  const [passengers, setPassengers] = useState<Passengers>(initial?.passengers ?? { adults: 1, children: 0, infants: 0 });
+  const [cabin, setCabin] = useState<Cabin>(initial?.cabin ?? "economy");
   const [errors, setErrors] = useState<FormErrors>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const departureRef = useRef<HTMLInputElement>(null);
+
+  // Komunikat (np. o minionych datach) ma być widoczny od razu, nawet gdy formularz jest wyżej niż aktualny widok.
+  useEffect(() => {
+    if (!notice) return;
+    formRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+    departureRef.current?.focus({ preventScroll: true });
+  }, [notice]);
 
   const roundTrip = tripType === "round_trip";
   const total = passengers.adults + passengers.children + passengers.infants;
@@ -83,10 +96,13 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       noValidate
-      className="@container rounded-lg bg-white p-5 shadow-sm ring-1 ring-neutral-200 sm:p-8"
+      className="@container scroll-mt-24 rounded-lg bg-white p-5 shadow-sm ring-1 ring-neutral-200 sm:p-8"
     >
+      {notice && <p className="mb-5 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">{notice}</p>}
+
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-neutral-800">Rodzaj podróży</legend>
         <div className="flex flex-wrap gap-2">
@@ -159,6 +175,7 @@ export function FlightSearchForm({ onSearch, today = todayISO() }: FlightSearchF
           </label>
           <input
             id="departure-date"
+            ref={departureRef}
             type="date"
             min={today}
             value={departureDate}

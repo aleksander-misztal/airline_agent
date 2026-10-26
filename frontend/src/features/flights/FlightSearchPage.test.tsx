@@ -42,7 +42,7 @@ describe("FlightSearchPage – results", () => {
   it("shows a loading state while searching", async () => {
     server.use(
       http.get("*/api/flights/search", async () => {
-        await delay(150);
+        await delay(500);
         return HttpResponse.json({ offers: [directOffer, connectingOffer] });
       }),
     );

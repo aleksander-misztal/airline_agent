@@ -11,6 +11,7 @@ import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { useDashboardStore } from "./features/dashboard/dashboardStore";
 import { FlightSearchPage } from "./features/flights/FlightSearchPage";
 import { useFlightSearchStore } from "./features/flights/flightSearchStore";
+import { useRecentSearchesStore } from "./features/flights/recentSearchesStore";
 
 function RootLayout() {
   const user = useAuthStore((s) => s.user);
@@ -32,6 +33,7 @@ function RootLayout() {
       useChatStore.getState().reset();
       useDashboardStore.getState().reset();
       useFlightSearchStore.getState().reset();
+      useRecentSearchesStore.getState().reset();
     }
   }, [status, loadDashboard]);
 
